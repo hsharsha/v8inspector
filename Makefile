@@ -13,10 +13,10 @@ CXX=g++
 CXFLAGS= -std=c++11 -ggdb3 -fno-pie -fno-inline # -O3 -Wall
 
 
-LDFLAGS=-luv -L/usr/local/opt/zlib/lib -lz -L/usr/local/opt/openssl/lib -lcrypto -L/Users/$(USER)/dev/v8/out/x64.release/ -lv8 -lv8_libplatform -lv8_libbase -L/Users/$(USER)/dev/v8/samples_1/ -licudata -licui18n -licustubdata -licuucx
+LDFLAGS= -lz -lcrypto -lrt -L/usr/local/lib/ -luv -L$(HOME)/dev/v8/out/x64.release/lib.target/ -lv8 -lv8_libplatform -lv8_libbase -licui18n -licuuc
 SOURCES=shell.cc http_parser.c inspector_socket.cc inspector_socket_server.cc inspector_agent.cc
 
-INCLUDE_DIRS=-I. -I/Users/$(USER)/dev/v8/ -I/Users/$(USER)/dev/v8/include/ -I/usr/local/opt/openssl/include -I/usr/local/opt/zlib/include -I/Users/$(USER)/dev/node/deps/icu-small/source/common/
+INCLUDE_DIRS=-I. -I/$(HOME)/dev/v8/ -I/$(HOME)/dev/v8/include/ -I$(HOME)/dev/node/deps/icu-small/source/common/
 
 OUT=inspector
 

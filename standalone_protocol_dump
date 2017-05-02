@@ -1,0 +1,129 @@
+Debugger listening on port 9900.
+Warning: This is an experimental feature and could change at any time.
+To start debugging, open the following URL in Chrome:
+    chrome-devtools://devtools/bundled/inspector.html?experiments=true&v8only=true&ws=172.31.56.175:9900/009d001c-00a7-4010-800b-007e00f7005a
+data_received_cb (548 bytes)
+47  45  54  20  2F  30  30  39  64  30  30  31  63  2D  30  30          GET /009d001c-00
+61  37  2D  34  30  31  30  2D  38  30  30  62  2D  30  30  37          a7-4010-800b-007
+65  30  30  66  37  30  30  35  61  20  48  54  54  50  2F  31          e00f7005a HTTP/1
+2E  31  0D  0A  48  6F  73  74  3A  20  35  34  2E  31  36  34          .1..Host: 54.164
+2E  37  34  2E  31  31  37  3A  39  39  30  30  0D  0A  43  6F          .74.117:9900..Co
+6E  6E  65  63  74  69  6F  6E  3A  20  55  70  67  72  61  64          nnection: Upgrad
+65  0D  0A  50  72  61  67  6D  61  3A  20  6E  6F  2D  63  61          e..Pragma: no-ca
+63  68  65  0D  0A  43  61  63  68  65  2D  43  6F  6E  74  72          che..Cache-Contr
+6F  6C  3A  20  6E  6F  2D  63  61  63  68  65  0D  0A  55  70          ol: no-cache..Up
+67  72  61  64  65  3A  20  77  65  62  73  6F  63  6B  65  74          grade: websocket
+0D  0A  4F  72  69  67  69  6E  3A  20  63  68  72  6F  6D  65          ..Origin: chrome
+2D  64  65  76  74  6F  6F  6C  73  3A  2F  2F  64  65  76  74          -devtools://devt
+6F  6F  6C  73  0D  0A  53  65  63  2D  57  65  62  53  6F  63          ools..Sec-WebSoc
+6B  65  74  2D  56  65  72  73  69  6F  6E  3A  20  31  33  0D          ket-Version: 13.
+0A  55  73  65  72  2D  41  67  65  6E  74  3A  20  4D  6F  7A          .User-Agent: Moz
+69  6C  6C  61  2F  35  2E  30  20  28  4D  61  63  69  6E  74          illa/5.0 (Macint
+6F  73  68  3B  20  49  6E  74  65  6C  20  4D  61  63  20  4F          osh; Intel Mac O
+53  20  58  20  31  30  5F  31  32  5F  34  29  20  41  70  70          S X 10_12_4) App
+6C  65  57  65  62  4B  69  74  2F  35  33  37  2E  33  36  20          leWebKit/537.36
+28  4B  48  54  4D  4C  2C  20  6C  69  6B  65  20  47  65  63          (KHTML, like Gec
+6B  6F  29  20  43  68  72  6F  6D  65  2F  35  37  2E  30  2E          ko) Chrome/57.0.
+32  39  38  37  2E  31  33  33  20  53  61  66  61  72  69  2F          2987.133 Safari/
+35  33  37  2E  33  36  0D  0A  41  63  63  65  70  74  2D  45          537.36..Accept-E
+6E  63  6F  64  69  6E  67  3A  20  67  7A  69  70  2C  20  64          ncoding: gzip, d
+65  66  6C  61  74  65  2C  20  73  64  63  68  0D  0A  41  63          eflate, sdch..Ac
+63  65  70  74  2D  4C  61  6E  67  75  61  67  65  3A  20  65          cept-Language: e
+6E  2D  55  53  2C  65  6E  3B  71  3D  30  2E  38  0D  0A  53          n-US,en;q=0.8..S
+65  63  2D  57  65  62  53  6F  63  6B  65  74  2D  4B  65  79          ec-WebSocket-Key
+3A  20  77  67  54  37  33  57  6F  43  43  67  63  36  44  72          : wgT73WoCCgc6Dr
+71  56  51  4E  68  6E  66  41  3D  3D  0D  0A  53  65  63  2D          qVQNhnfA==..Sec-
+57  65  62  53  6F  63  6B  65  74  2D  45  78  74  65  6E  73          WebSocket-Extens
+69  6F  6E  73  3A  20  70  65  72  6D  65  73  73  61  67  65          ions: permessage
+2D  64  65  66  6C  61  74  65  3B  20  63  6C  69  65  6E  74          -deflate; client
+5F  6D  61  78  5F  77  69  6E  64  6F  77  5F  62  69  74  73          _max_window_bits
+0D  0A  0D  0A                                                          ....
+
+
+write_to_client (129 bytes):
+48  54  54  50  2F  31  2E  31  20  31  30  31  20  53  77  69          HTTP/1.1 101 Swi
+74  63  68  69  6E  67  20  50  72  6F  74  6F  63  6F  6C  73          tching Protocols
+0D  0A  55  70  67  72  61  64  65  3A  20  77  65  62  73  6F          ..Upgrade: webso
+63  6B  65  74  0D  0A  43  6F  6E  6E  65  63  74  69  6F  6E          cket..Connection
+3A  20  55  70  67  72  61  64  65  0D  0A  53  65  63  2D  57          : Upgrade..Sec-W
+65  62  53  6F  63  6B  65  74  2D  41  63  63  65  70  74  3A          ebSocket-Accept:
+20  53  4F  72  4C  65  5A  6D  36  61  76  67  49  64  4E  77           SOrLeZm6avgIdNw
+74  4C  73  77  45  74  44  49  37  34  38  51  3D  0D  0A  0D          tLswEtDI748Q=...
+0A                                                                      .
+
+
+537 handshake passed
+websockets_data_cb read 40 bytes
+81  A2  1A  3C  2A  C5  61  1E  43  A1  38  06  1B  E9  38  51          ..<*.aC.8.8Q
+4F  B1  72  53  4E  E7  20  1E  78  B0  74  48  43  A8  7F  12          O.rSN. x.tHC.
+4F  AB  7B  5E  46  A0  38  41                                          O.{^F.8A
+
+
+websockets_data_cb read 244 bytes
+81  A3  69  32  7E  5A  12  10  17  3E  4B  08  4C  76  4B  5F          ..i2~Z...>K.LvK_
+1B  2E  01  5D  1A  78  53  10  3A  3F  0B  47  19  3D  0C  40          .]xS.:?.G.=.@
+50  3F  07  53  1C  36  0C  10  03  81  CB  DC  4A  77  54  A7          P?.S6......JwT.
+68  1E  30  FE  70  44  78  FE  27  12  20  B4  25  13  76  E6          h0.pDx.'. .%.v.
+68  33  31  BE  3F  10  33  B9  38  59  27  B9  3E  27  35  A9          h31.?.3.8Y'.>'5.
+39  12  1B  B2  0F  0F  37  B9  3A  03  3D  B3  24  04  76  F0          9...7.:.=.$.v.
+68  07  35  AE  2B  1A  27  FE  70  0C  76  AF  3E  16  20  B9          h.5.+'.p.v.>. .
+68  4D  76  B2  25  19  31  FE  37  0A  81  CB  F5  A1  C1  DD          hMv.%.1.7.......
+8E  83  A8  B9  D7  9B  F5  F1  D7  CC  A4  A9  9D  CE  A5  FF          ................
+CF  83  85  B8  97  D4  A6  BA  90  D3  EF  AE  90  D5  80  AE          ................
+8C  CF  A2  9E  94  CD  AD  8E  81  C0  A2  B6  B1  C4  B1  A9          ................
+9D  83  ED  FF  85  C0  B3  BC  98  D2  E3  E7  8E  83  AC  BC          ................
+8D  E5  A4  AD  81  C9  E3  E7  C5  DC  BC  81  A3  7D  3B  34          .............};4
+CA  06  19  5D  AE  5F  01  01  E6  5F  56  51  BE  15  54  50          ...]._..._VQ..TP
+E8  47  19  64  B8  12  5D  5D  A6  18  49  1A  AF  13  5A  56          .G.d..]]..I..ZV
+A6  18  19  49                                                          ...I
+
+
+websockets_data_cb read 80 bytes
+81  CA  48  E3  13  9D  33  C1  7A  F9  6A  D9  25  B1  6A  8E          ..H...3.z.j.%.j.
+76  E9  20  8C  77  BF  72  C1  43  EF  27  85  7A  F1  2D  91          v. .w.r.C.'.z.-.
+3D  EE  2D  97  40  FC  25  93  7F  F4  26  84  5A  F3  3C  86          =.-.@.%.&.Z.<.
+61  EB  29  8F  31  B1  6A  93  72  EF  29  8E  60  BF  72  98          a.).1.j.r.).`.r.
+31  F4  26  97  76  EF  3E  82  7F  BF  72  D2  23  AD  35  9E          1.&.v.>.r.#.5.
+
+
+websockets_data_cb read 136 bytes
+81  C9  D9  EF  63  F6  A2  CD  0A  92  FB  D5  54  DA  FB  82          ....c.......T...
+06  82  B1  80  07  D4  E3  CD  27  93  BB  9A  04  91  BC  9D          ........'.......
+4D  85  BC  9B  21  9A  B8  8C  08  94  B6  97  33  97  AD  9B          M...!.......3...
+06  84  B7  9C  41  DA  FB  9F  02  84  B8  82  10  D4  E3  94          ....A...........
+41  86  B8  9B  17  93  AB  81  10  D4  E3  B4  3E  8B  A4  81          A...........>...
+B3  FA  03  ED  9F  81  21  84  FB  D8  39  D5  B3  D8  6E  88          ......!...9...n.
+EB  92  6C  89  BD  C0  21  BF  EA  94  77  84  F2  9F  2D  9F          ..l...!...w...-.
+EA  94  4A  8B  C8  9B  6A  99  F6  94  64  AB  F0  88  47  88          ..J...j...d...G.
+FD  8F  64  8A  FA  88  21  90                                          ..d...!.
+
+
+Debugger attached.
+write_to_client (118 bytes):
+81  74  7B  22  6D  65  74  68  6F  64  22  3A  22  52  75  6E          .t{"method":"Run
+74  69  6D  65  2E  65  78  65  63  75  74  69  6F  6E  43  6F          time.executionCo
+6E  74  65  78  74  43  72  65  61  74  65  64  22  2C  22  70          ntextCreated","p
+61  72  61  6D  73  22  3A  7B  22  63  6F  6E  74  65  78  74          arams":{"context
+22  3A  7B  22  69  64  22  3A  31  2C  22  6F  72  69  67  69          ":{"id":1,"origi
+6E  22  3A  22  22  2C  22  6E  61  6D  65  22  3A  22  4E  6F          n":"","name":"No
+64  65  2E  6A  73  20  4D  61  69  6E  20  43  6F  6E  74  65          de.js Main Conte
+78  74  22  7D  7D  7D                                                  xt"}}}
+
+
+write_to_client (22 bytes):
+81  14  7B  22  69  64  22  3A  31  2C  22  72  65  73  75  6C          ..{"id":1,"resul
+74  22  3A  7B  7D  7D                                                  t":{}}
+
+
+Received signal 11 SEGV_MAPERR 000000000000
+
+==== C stack trace ===============================
+
+ [0x7f35d65689c1]
+ [0x7f35d3ce24b0]
+ [0x000000424c50]
+ [0x000000423548]
+ [0x0000004218d5]
+ [0x00000042290e]
+ [0x7f35d672d0ed]
+ [0x000000407b0aSegmentation fault (core dumped)

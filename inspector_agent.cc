@@ -112,6 +112,7 @@ std::unique_ptr<StringBuffer> Utf8ToStringView(const std::string& message) {
                   utf16.length());
   return StringBuffer::create(view);
 }
+
 }  // namespace
 
 class V8NodeInspector;
@@ -149,7 +150,7 @@ class InspectorAgentDelegate: public SocketServerDelegate {
 
 class AgentImpl {
  public:
-  explicit AgentImpl(v8::Isolate* isolate);
+  explicit AgentImpl(v8::Isolate *isolate);
 
   // Start the inspector agent thread
   bool Start(v8::Platform* platform, const char* path);
@@ -162,8 +163,6 @@ class AgentImpl {
 
   void FatalException(v8::Local<v8::Value> error,
                       v8::Local<v8::Message> message);
-
-  void SchedulePauseOnNextStatement(const std::string& reason);
 
   void PostIncomingMessage(InspectorAction action, int session_id,
                            const std::string& message);
@@ -180,13 +179,9 @@ class AgentImpl {
   static void ThreadCbIO(void* agent);
   static void WriteCbIO(uv_async_t* async);
   static void MainThreadAsyncCb(uv_async_t* req);
-  static void CallAndPauseOnStart(
-      const v8::FunctionCallbackInfo<v8::Value>& args);
 
   void InstallInspectorOnProcess();
-  void SetMethod(v8::Local<v8::Object> that,
-                                   const char* name,
-                                   v8::FunctionCallback callback);
+
   void WorkerRunIO();
   void SetConnected(bool connected);
   void DispatchMessages();
@@ -201,18 +196,18 @@ class AgentImpl {
   void NotifyMessageReceived();
   State ToState(State state);
 
+  v8::Isolate* isolate_;
   uv_sem_t start_sem_;
+  uv_loop_t* inspector_event_loop;
   std::condition_variable incoming_message_cond_;
-  //std::mutex state_lock_;
+  std::mutex state_lock_;
   uv_thread_t thread_;
   uv_loop_t child_loop_;
-  uv_loop_t* inspector_event_loop;
 
   InspectorAgentDelegate* delegate_;
   bool wait_;
   bool shutting_down_;
   State state_;
-  v8::Isolate* isolate_;
 
   uv_async_t io_thread_req_;
   uv_async_t main_thread_req_;
@@ -258,7 +253,7 @@ class ChannelImpl final : public v8_inspector::V8Inspector::Channel {
   explicit ChannelImpl(AgentImpl* agent): agent_(agent) {}
   virtual ~ChannelImpl() {}
  private:
-  void sendResponse(
+void sendResponse(
       int callId,
       std::unique_ptr<v8_inspector::StringBuffer> message) override {
     sendMessageToFrontend(message->string());
@@ -268,6 +263,17 @@ class ChannelImpl final : public v8_inspector::V8Inspector::Channel {
       std::unique_ptr<v8_inspector::StringBuffer> message) override {
     sendMessageToFrontend(message->string());
   }
+
+
+#if 0
+  void sendProtocolResponse(int callId, const StringView& message) override {
+    sendMessageToFrontend(message);
+  }
+
+  void sendProtocolNotification(const StringView& message) override {
+    sendMessageToFrontend(message);
+  }
+#endif
 
   void flushProtocolNotifications() override { }
 
@@ -285,17 +291,16 @@ using V8Inspector = v8_inspector::V8Inspector;
 
 class V8NodeInspector : public v8_inspector::V8InspectorClient {
  public:
-  V8NodeInspector(AgentImpl* agent, v8::Isolate* isolate,
+  V8NodeInspector(AgentImpl* agent,
                   v8::Platform* platform)
                   : agent_(agent),
-                    isolate_(isolate),
                     platform_(platform),
                     terminated_(false),
                     running_nested_loop_(false),
-                    inspector_(V8Inspector::create(isolate, this)) {
+                    inspector_(V8Inspector::create(agent_->isolate_, this)) {
     const uint8_t CONTEXT_NAME[] = "Node.js Main Context";
     StringView context_name(CONTEXT_NAME, sizeof(CONTEXT_NAME) - 1);
-    v8_inspector::V8ContextInfo info(isolate->GetCurrentContext(), 1, context_name);
+    v8_inspector::V8ContextInfo info(agent_->isolate_->GetCurrentContext(), 1, context_name);
     inspector_->contextCreated(info);
   }
 
@@ -306,7 +311,7 @@ class V8NodeInspector : public v8_inspector::V8InspectorClient {
     running_nested_loop_ = true;
     while (!terminated_) {
       agent_->WaitForFrontendMessage();
-      while (v8::platform::PumpMessageLoop(platform_, isolate_))
+      while (v8::platform::PumpMessageLoop(platform_, agent_->isolate_))
         {}
     }
     terminated_ = false;
@@ -323,7 +328,6 @@ class V8NodeInspector : public v8_inspector::V8InspectorClient {
 
   void connectFrontend() {
     session_ = inspector_->connect(1, new ChannelImpl(agent_), StringView());
-    fprintf(stderr, "%d %s %s connected to frontend.\n", __LINE__, __FUNCTION__, __FILE__);
   }
 
   void disconnectFrontend() {
@@ -335,17 +339,9 @@ class V8NodeInspector : public v8_inspector::V8InspectorClient {
     session_->dispatchProtocolMessage(message);
   }
 
-  void schedulePauseOnNextStatement(const std::string& reason) {
-    if (session_ != nullptr) {
-      std::unique_ptr<StringBuffer> buffer = Utf8ToStringView(reason);
-      session_->schedulePauseOnNextStatement(buffer->string(),
-                                             buffer->string());
-    }
-  }
-
   v8::Local<v8::Context> ensureDefaultContextInGroup(int contextGroupId)
       override {
-    return isolate_->GetCurrentContext();
+    return agent_->isolate_->GetCurrentContext();
   }
 
   V8Inspector* inspector() {
@@ -354,7 +350,6 @@ class V8NodeInspector : public v8_inspector::V8InspectorClient {
 
  private:
   AgentImpl* agent_;
-  v8::Isolate* isolate_;
   v8::Platform* platform_;
   bool terminated_;
   bool running_nested_loop_;
@@ -363,10 +358,10 @@ class V8NodeInspector : public v8_inspector::V8InspectorClient {
 };
 
 AgentImpl::AgentImpl(v8::Isolate* isolate) : delegate_(nullptr),
-                                         wait_(false),
+                                         wait_(true),
+                                         isolate_(isolate),
                                          shutting_down_(false),
                                          state_(State::kNew),
-                                         isolate_(isolate),
                                          inspector_(nullptr),
                                          platform_(nullptr),
                                          dispatching_messages_(false),
@@ -444,15 +439,13 @@ void InspectorWrapConsoleCall(const v8::FunctionCallbackInfo<v8::Value>& args) {
                                               InspectorConsoleCall,
                                               array).ToLocalChecked());
 }
-
 bool AgentImpl::Start(v8::Platform* platform, const char* path) {
-  wait_ = true;
-  inspector_ = new V8NodeInspector(this, isolate_, platform);
+  inspector_ = new V8NodeInspector(this, platform);
   platform_ = platform;
   if (path != nullptr)
     script_name_ = path;
 
-  //InstallInspectorOnProcess();
+  InstallInspectorOnProcess();
 
   int err = uv_thread_create(&thread_, AgentImpl::ThreadCbIO, this);
   assert(err == 0);
@@ -493,42 +486,11 @@ void AgentImpl::WaitForDisconnect() {
   }
 }
 
-#if 0
-void AgentImpl::SetMethod(v8::Local<v8::Object> that,
-                                   const char* name,
-                                   v8::FunctionCallback callback) {
-  const v8::NewStringType type = v8::NewStringType::kInternalized;
-  v8::Local<v8::String> name_string =
-      v8::String::NewFromUtf8(isolate_, name, type).ToLocalChecked();
-  that->Set(name_string, callback);
-}
-
 void AgentImpl::InstallInspectorOnProcess() {
-  v8::Local<v8::Object> inspector = v8::Object::New(isolate_);
-  SetMethod(inspector, "wrapConsoleCall", InspectorWrapConsoleCall);
-  if (wait_) {
-    SetMethod(inspector, "callAndPauseOnStart", AgentImpl::CallAndPauseOnStart);
-  }
-}
-#endif
+  v8::Local<v8::ObjectTemplate> inspector = v8::ObjectTemplate::New(isolate_);
 
-// static
-void AgentImpl::CallAndPauseOnStart(
-      const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::Isolate* isolate = args.GetIsolate();
-  assert(args.Length() > 1);
-  assert(args[0]->IsFunction());
-  std::vector<v8::Local<v8::Value>> call_args;
-  for (int i = 2; i < args.Length(); i++) {
-    call_args.push_back(args[i]);
-  }
-
-  //SchedulePauseOnNextStatement("Break on start");
-
-  v8::MaybeLocal<v8::Value> retval =
-      args[0].As<v8::Function>()->Call(isolate->GetCurrentContext(), args[1],
-                                       call_args.size(), call_args.data());
-  args.GetReturnValue().Set(retval.ToLocalChecked());
+    inspector->Set(v8::String::NewFromUtf8(isolate_, "wrapConsoleCall"),
+                          v8::FunctionTemplate::New(isolate_, InspectorWrapConsoleCall));
 }
 
 std::unique_ptr<StringBuffer> ToProtocolString(v8::Local<v8::Value> value) {
@@ -612,7 +574,9 @@ void AgentImpl::WorkerRunIO() {
   }
   InspectorAgentDelegate delegate(this, script_path, script_name_, wait_);
   delegate_ = &delegate;
-  InspectorSocketServer server(&delegate, "127.0.0.1", 9900);
+  InspectorSocketServer server(&delegate,
+                               "172.31.56.175",
+                               9900);
   if (!server.Start(&child_loop_)) {
     state_ = State::kError;  // Safe, main thread is waiting on semaphore
     uv_close(reinterpret_cast<uv_handle_t*>(&io_thread_req_), nullptr);
@@ -639,43 +603,42 @@ template <typename ActionType>
 bool AgentImpl::AppendMessage(MessageQueue<ActionType>* queue,
                               ActionType action, int session_id,
                               std::unique_ptr<StringBuffer> buffer) {
-  //state_lock_.lock();
+  state_lock_.lock();
   bool trigger_pumping = queue->empty();
   queue->push_back(std::make_tuple(action, session_id, std::move(buffer)));
-  //state_lock_.unlock();
+  state_lock_.unlock();
   return trigger_pumping;
 }
 
 template <typename ActionType>
 void AgentImpl::SwapBehindLock(MessageQueue<ActionType>* vector1,
                                MessageQueue<ActionType>* vector2) {
-  //state_lock_.lock();
+  state_lock_.lock();
   vector1->swap(*vector2);
-  //state_lock_.unlock();
+  state_lock_.unlock();
 }
 
 void AgentImpl::PostIncomingMessage(InspectorAction action, int session_id,
                                     const std::string& message) {
   if (AppendMessage(&incoming_message_queue_, action, session_id,
                     Utf8ToStringView(message))) {
-    v8::Isolate* isolate = isolate_;
-    platform_->CallOnForegroundThread(isolate,
+    platform_->CallOnForegroundThread(isolate_,
                                       new DispatchOnInspectorBackendTask(this));
-    isolate->RequestInterrupt(InterruptCallback, this);
+    isolate_->RequestInterrupt(InterruptCallback, this);
     assert(0 == uv_async_send(&main_thread_req_));
   }
   NotifyMessageReceived();
 }
 
 void AgentImpl::WaitForFrontendMessage() {
-  //std::unique_lock<std::mutex> lck(state_lock_);
-  //if (incoming_message_queue_.empty())
-    //incoming_message_cond_.wait(lck);
+  std::unique_lock<std::mutex> lck(state_lock_);
+  if (incoming_message_queue_.empty())
+    incoming_message_cond_.wait(lck);
 }
 
 void AgentImpl::NotifyMessageReceived() {
-  //std::unique_lock<std::mutex> lck(state_lock_);
-  //incoming_message_cond_.notify_all();
+  std::unique_lock<std::mutex> lck(state_lock_);
+  incoming_message_cond_.notify_all();
 }
 
 void AgentImpl::DispatchMessages() {
@@ -694,14 +657,14 @@ void AgentImpl::DispatchMessages() {
       StringView message = std::get<2>(task)->string();
       switch (std::get<0>(task)) {
       case InspectorAction::kStartSession:
-        assert(State::kAccepting ==  state_);
+        assert(State::kAccepting == state_);
         session_id_ = std::get<1>(task);
         state_ = State::kConnected;
         fprintf(stderr, "Debugger attached.\n");
         inspector_->connectFrontend();
         break;
       case InspectorAction::kEndSession:
-        assert(State::kConnected ==  state_);
+        assert(State::kConnected == state_);
         if (shutting_down_) {
           state_ = State::kDone;
         } else {
@@ -711,7 +674,6 @@ void AgentImpl::DispatchMessages() {
         inspector_->disconnectFrontend();
         break;
       case InspectorAction::kSendMessage:
-    fprintf(stderr, "%d %s %s in send messages action.\n", __LINE__, __FUNCTION__, __FILE__);
         inspector_->dispatchMessageFromFrontend(message);
         break;
       }
@@ -731,13 +693,10 @@ void AgentImpl::Write(TransportAction action, int session_id,
   AppendMessage(&outgoing_message_queue_, action, session_id,
                 StringBuffer::create(inspector_message));
   int err = uv_async_send(&io_thread_req_);
-  assert(0 ==  err);
+  assert(0 == err);
 }
 
-void AgentImpl::SchedulePauseOnNextStatement(const std::string& reason) {
-  inspector_->schedulePauseOnNextStatement(reason);
-}
-
+// Exported class Agent
 InspectorAgentDelegate::InspectorAgentDelegate(AgentImpl* agent,
                                                const std::string& script_path,
                                                const std::string& script_name,

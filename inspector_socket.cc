@@ -12,8 +12,8 @@
 #define ACCEPT_KEY_LENGTH base64_encoded_size(20)
 #define BUFFER_GROWTH_CHUNK_SIZE 1024
 
-#define DUMP_READS 0
-#define DUMP_WRITES 0
+#define DUMP_READS 1
+#define DUMP_WRITES 1
 
 
 static const char CLOSE_FRAME[] = {'\x88', '\x00'};
@@ -100,6 +100,7 @@ static int write_to_client(InspectorSocket* inspector,
 #if DUMP_WRITES
   printf("%s (%ld bytes):\n", __FUNCTION__, len);
   dump_hex(msg, len);
+    //printf("%*s", len, msg);
 #endif
 
   // Freed in write_request_cleanup
@@ -338,6 +339,7 @@ static void websockets_data_cb(uv_stream_t* stream, ssize_t nread,
       if (nread > 0) {
         dump_hex(inspector->buffer.data() + inspector->buffer.size() - nread,
                  nread);
+    //printf("%*s", inspector->buffer.size(), inspector->buffer.data());
       }
     #endif
     // 2. Parse.
@@ -508,12 +510,11 @@ static int message_complete_cb(http_parser* parser) {
 
 static void data_received_cb(uv_stream_s* client, ssize_t nread,
                              const uv_buf_t* buf) {
-//#if DUMP_READS
-#if 1
+#if DUMP_READS
   if (nread >= 0) {
     printf("%s (%ld bytes)\n", __FUNCTION__, nread);
-    //dump_hex(buf->base, nread);
-    printf("%*s", nread, buf->base);
+    dump_hex(buf->base, nread);
+    //printf("%*s", nread, buf->base);
   } else {
     printf("[%s:%d] %s\n", __FUNCTION__, __LINE__, uv_err_name(nread));
   }
