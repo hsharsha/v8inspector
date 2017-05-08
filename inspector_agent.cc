@@ -278,7 +278,8 @@ void sendResponse(
   void flushProtocolNotifications() override { }
 
   void sendMessageToFrontend(const StringView& message) {
-    agent_->Write(TransportAction::kSendMessage, agent_->session_id_, message);
+    //agent_->Write(TransportAction::kSendMessage, agent_->session_id_, message);
+    agent_->server_->Send(agent_->session_id_, StringViewToUtf8(message));
   }
 
   AgentImpl* const agent_;
@@ -479,7 +480,7 @@ bool AgentImpl::IsStarted() {
 void AgentImpl::WaitForDisconnect() {
   if (state_ == State::kConnected) {
     shutting_down_ = true;
-    Write(TransportAction::kStop, 0, StringView());
+    //Write(TransportAction::kStop, 0, StringView());
     fprintf(stderr, "Waiting for the debugger to disconnect...\n");
     fflush(stderr);
     inspector_->runMessageLoopOnPause(0);
@@ -620,6 +621,7 @@ void AgentImpl::SwapBehindLock(MessageQueue<ActionType>* vector1,
 
 void AgentImpl::PostIncomingMessage(InspectorAction action, int session_id,
                                     const std::string& message) {
+    printf("%s %d appending action %d session %d and  message %s\n", __FILE__, __LINE__, action, session_id, message.c_str());
   if (AppendMessage(&incoming_message_queue_, action, session_id,
                     Utf8ToStringView(message))) {
     platform_->CallOnForegroundThread(isolate_,
@@ -688,6 +690,7 @@ void AgentImpl::MainThreadAsyncCb(uv_async_t* req) {
   agent->DispatchMessages();
 }
 
+#if 0
 void AgentImpl::Write(TransportAction action, int session_id,
                       const StringView& inspector_message) {
   AppendMessage(&outgoing_message_queue_, action, session_id,
@@ -695,6 +698,7 @@ void AgentImpl::Write(TransportAction action, int session_id,
   int err = uv_async_send(&io_thread_req_);
   assert(0 == err);
 }
+#endif
 
 // Exported class Agent
 InspectorAgentDelegate::InspectorAgentDelegate(AgentImpl* agent,

@@ -301,11 +301,11 @@ int RunMain(v8::Isolate* isolate, v8::Platform* platform, int argc,
         fprintf(stderr, "Error reading '%s'\n", str);
         continue;
       }
-      //bool success = ExecuteString(isolate, source, file_name, false, true);
     extern void start_debug_agent(v8::Isolate*, v8::Platform*, const char *);
     start_debug_agent(isolate, platform, str);
+      bool success = ExecuteString(isolate, source, file_name, false, true);
       while (v8::platform::PumpMessageLoop(platform, isolate)) continue;
-      //if (!success) return 1;
+      if (!success) return 1;
     }
   }
   return 0;
