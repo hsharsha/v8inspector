@@ -12,8 +12,8 @@
 #define ACCEPT_KEY_LENGTH base64_encoded_size(20)
 #define BUFFER_GROWTH_CHUNK_SIZE 1024
 
-#define DUMP_READS 1
-#define DUMP_WRITES 1
+#define DUMP_READS 0
+#define DUMP_WRITES 0
 
 
 static const char CLOSE_FRAME[] = {'\x88', '\x00'};

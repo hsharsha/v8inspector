@@ -14,7 +14,7 @@ CXFLAGS= -std=c++11 -ggdb3 -fno-pie -fno-inline # -O3 -Wall
 
 
 LDFLAGS= -lz -lcrypto -lrt -L/usr/local/lib/ -luv -L$(HOME)/dev/v8/out/x64.release/lib.target/ -lv8 -lv8_libplatform -lv8_libbase -licui18n -licuuc
-SOURCES=shell.cc http_parser.c inspector_socket.cc inspector_socket_server.cc inspector_agent.cc
+SOURCES=http_parser.c inspector_socket.cc inspector_socket_server.cc inspector_agent.cc
 
 INCLUDE_DIRS=-I. -I/$(HOME)/dev/v8/ -I/$(HOME)/dev/v8/include/ -I$(HOME)/dev/node/deps/icu-small/source/common/
 
