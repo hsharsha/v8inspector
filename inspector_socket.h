@@ -7,6 +7,43 @@
 #include <string>
 #include <vector>
 
+namespace inspector {
+
+enum inspector_handshake_event {
+  kInspectorHandshakeUpgrading,
+  kInspectorHandshakeUpgraded,
+  kInspectorHandshakeHttpGet,
+  kInspectorHandshakeFailed
+};
+
+class InspectorSocket;
+
+typedef void (*inspector_cb)(InspectorSocket*, int);
+// Notifies as handshake is progressing. Returning false as a response to
+// kInspectorHandshakeUpgrading or kInspectorHandshakeHttpGet event will abort
+// the connection. inspector_write can be used from the callback.
+typedef bool (*handshake_cb)(InspectorSocket*,
+                             enum inspector_handshake_event state,
+                             const std::string& path);
+
+struct http_parsing_state_s {
+  http_parser parser;
+  http_parser_settings parser_settings;
+  handshake_cb callback;
+  bool done;
+  bool parsing_value;
+  std::string ws_key;
+  std::string path;
+  std::string current_header;
+};
+
+struct ws_state_s {
+  uv_alloc_cb alloc_cb;
+  uv_read_cb read_cb;
+  inspector_cb close_cb;
+  bool close_sent;
+  bool received_close;
+};
 
 inline char ToLower(char c) {
   return c >= 'A' && c <= 'Z' ? c + ('a' - 'A') : c;
@@ -65,43 +102,7 @@ inline ContainerOfHelper<Inner, Outer> ContainerOf(Inner Outer::*field,
 }
 
 
-
-enum inspector_handshake_event {
-  kInspectorHandshakeUpgrading,
-  kInspectorHandshakeUpgraded,
-  kInspectorHandshakeHttpGet,
-  kInspectorHandshakeFailed
-};
-
-class InspectorSocket;
-
-typedef void (*inspector_cb)(InspectorSocket*, int);
-// Notifies as handshake is progressing. Returning false as a response to
-// kInspectorHandshakeUpgrading or kInspectorHandshakeHttpGet event will abort
-// the connection. inspector_write can be used from the callback.
-typedef bool (*handshake_cb)(InspectorSocket*,
-                             enum inspector_handshake_event state,
-                             const std::string& path);
-
-struct http_parsing_state_s {
-  http_parser parser;
-  http_parser_settings parser_settings;
-  handshake_cb callback;
-  bool done;
-  bool parsing_value;
-  std::string ws_key;
-  std::string path;
-  std::string current_header;
-};
-
-struct ws_state_s {
-  uv_alloc_cb alloc_cb;
-  uv_read_cb read_cb;
-  inspector_cb close_cb;
-  bool close_sent;
-  bool received_close;
-};
-
+// HTTP Wrapper around a uv_tcp_t
 class InspectorSocket {
  public:
   InspectorSocket() : data(nullptr), http_parsing_state(nullptr),
@@ -112,7 +113,7 @@ class InspectorSocket {
   struct http_parsing_state_s* http_parsing_state;
   struct ws_state_s* ws_state;
   std::vector<char> buffer;
-  uv_tcp_t client;
+  uv_tcp_t tcp;
   bool ws_mode;
   bool shutting_down;
   bool connection_eof;
@@ -134,7 +135,7 @@ void inspector_write(InspectorSocket* inspector,
 bool inspector_is_active(const InspectorSocket* inspector);
 
 inline InspectorSocket* inspector_from_stream(uv_tcp_t* stream) {
-  return ContainerOf(&InspectorSocket::client, stream);
+  return ContainerOf(&InspectorSocket::tcp, stream);
 }
 
 inline InspectorSocket* inspector_from_stream(uv_stream_t* stream) {
@@ -145,6 +146,7 @@ inline InspectorSocket* inspector_from_stream(uv_handle_t* stream) {
   return inspector_from_stream(reinterpret_cast<uv_tcp_t*>(stream));
 }
 
+}  // namespace inspector
 
 
 #endif  // SRC_INSPECTOR_SOCKET_H_
