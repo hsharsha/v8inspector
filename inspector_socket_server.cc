@@ -99,11 +99,12 @@ void PrintDebuggerReadyMessage(const std::string& host,
     return;
   }
   for (const std::string& id : ids) {
-    fprintf(out, "Debugger listening on %s\n",
-            FormatWsAddress(host, port, id, true).c_str());
+    std::string frontend_url;
+    frontend_url = "chrome-devtools://devtools/bundled";
+    frontend_url += "/inspector.html?experiments=true&v8only=true&ws=";
+    frontend_url += FormatWsAddress(host, port, id, false);
+    fprintf(out, "Debugger listening on %s\n", frontend_url.c_str());
   }
-  fprintf(out, "For help see %s\n",
-          "https://nodejs.org/en/docs/inspector");
   fflush(out);
 }
 
