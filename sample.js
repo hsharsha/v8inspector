@@ -1,4 +1,4 @@
-//callAndPauseOnStart(function () {
+callAndPauseOnStart(function () {
 print("hello world");
 function exponent(base, exp)
 {
@@ -16,4 +16,4 @@ for(var i = 0; i < 1000000; i++) {
     print(exponent(2, i));
     //print("\n");
 }
-//});
+});
