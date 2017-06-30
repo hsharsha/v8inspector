@@ -1,5 +1,3 @@
-callAndPauseOnStart(function () {
-print("hello world");
 function exponent(base, exp)
 {
     var result = 1;
@@ -8,12 +6,3 @@ function exponent(base, exp)
     }
     return result;
 }
-
-for(var i = 0; i < 1000000; i++) {
-    //print("debugging ");
-    //print(i);
-    //print("\n");
-    print(exponent(2, i));
-    //print("\n");
-}
-});

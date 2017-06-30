@@ -53,6 +53,28 @@ class StartIoTask : public v8::Task {
   Agent* agent;
 };
 
+void CallAndPauseOnStart(
+    const v8::FunctionCallbackInfo<v8::Value>& args) {
+  assert(args.Length() >= 1);
+  assert(args[0]->IsFunction());
+
+  std::vector<v8::Local<v8::Value>> call_args;
+  for (int i = 1; i < args.Length(); i++) {
+    call_args.push_back(args[i]);
+  }
+
+  v8::Isolate *isolate = v8::Isolate::GetCurrent();
+  Agent *agent = static_cast<Agent *>(isolate->GetData(0));
+  agent->PauseOnNextJavascriptStatement("Break on start");
+  v8::MaybeLocal<v8::Value> retval =
+      args[0].As<v8::Function>()->Call(isolate->GetCurrentContext()->Global(),
+                                       call_args.size(), call_args.data());
+  if (!retval.IsEmpty()) {
+    args.GetReturnValue().Set(retval.ToLocalChecked());
+  }
+}
+
+
 std::unique_ptr<StringBuffer> ToProtocolString(v8::Local<v8::Value> value) {
   if (value.IsEmpty() || value->IsNull() || value->IsUndefined() ||
       !value->IsString()) {
@@ -247,6 +269,11 @@ Agent::~Agent() {
 bool Agent::Start(Environment *env, v8::Platform* platform, const char* path) {
   path_ = path == nullptr ? "" : path;
   parent_env_ = env;
+  env->isolate()->SetData(0, this);
+  env->context()->Global()->Set(
+      v8::String::NewFromUtf8(env->isolate(), "callAndPauseOnStart", v8::NewStringType::kNormal)
+          .ToLocalChecked(),
+      v8::FunctionTemplate::New(env->isolate(), CallAndPauseOnStart)->GetFunction());
   client_ =
       std::unique_ptr<NodeInspectorClient>(
           new NodeInspectorClient(parent_env_, platform));
