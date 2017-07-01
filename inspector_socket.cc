@@ -1,6 +1,5 @@
 #include "inspector_socket.h"
 
-#define NODE_WANT_INTERNALS 1
 #include "base64.h"
 
 #include "openssl/sha.h"  // Sha-1 hash

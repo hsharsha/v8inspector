@@ -4,11 +4,12 @@
 #include <memory>
 #include "v8.h"
 #include "v8-inspector.h"
-#include "env.h"
 
 #include <stddef.h>
 
 namespace inspector {
+
+using namespace v8;
 
 class InspectorSessionDelegate {
  public:
@@ -19,7 +20,7 @@ class InspectorSessionDelegate {
 };
 
 class InspectorIo;
-class NodeInspectorClient;
+class CBInspectorClient;
 
 class Agent {
  public:
@@ -27,7 +28,7 @@ class Agent {
   ~Agent();
 
   // Create client_, may create io_ if option enabled
-  bool Start(Environment *env, v8::Platform* platform, const char* path);
+  bool Start(Isolate* isolate, Platform* platform, const char* path);
   // Stop and destroy io_
   void Stop();
 
@@ -38,8 +39,8 @@ class Agent {
 
 
   void WaitForDisconnect();
-  void FatalException(v8::Local<v8::Value> error,
-                      v8::Local<v8::Message> message);
+  void FatalException(Local<Value> error,
+                      Local<Message> message);
 
   // These methods are called by the WS protocol and JS binding to create
   // inspector sessions.  The inspector responds by using the delegate to send
@@ -54,9 +55,9 @@ class Agent {
   void PauseOnNextJavascriptStatement(const std::string& reason);
 
   // Initialize 'inspector' module bindings
-  static void InitInspector(v8::Local<v8::Object> target,
-                            v8::Local<v8::Value> unused,
-                            v8::Local<v8::Context> context,
+  static void InitInspector(Local<Object> target,
+                            Local<Value> unused,
+                            Local<Context> context,
                             void* priv);
 
   InspectorIo* io() {
@@ -70,12 +71,12 @@ class Agent {
   void RequestIoThreadStart();
 
  private:
-  std::unique_ptr<NodeInspectorClient> client_;
+  std::unique_ptr<CBInspectorClient> client_;
   std::unique_ptr<InspectorIo> io_;
-  v8::Platform* platform_;
+  Platform* platform_;
+  Isolate* isolate_;
   bool enabled_;
   std::string path_;
-  Environment *parent_env_;
 };
 
 }  // namespace inspector

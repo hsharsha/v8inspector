@@ -10,7 +10,6 @@
 #include "libplatform/libplatform.h"
 #include "v8.h"
 #include "inspector_agent.h"
-#include "env.h"
 
 using namespace v8;
 using namespace inspector;
@@ -141,8 +140,7 @@ int main(int argc, char* argv[]) {
     Context::Scope context_scope(context);
 
     Agent *agent = new Agent();
-    Environment *env = new Environment(isolate, agent);
-    agent->Start(env, platform, nullptr);
+    agent->Start(isolate, platform, argv[1]);
 
     Local<String> file_name =
           String::NewFromUtf8(isolate, argv[1], NewStringType::kNormal)

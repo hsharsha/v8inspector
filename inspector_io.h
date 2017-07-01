@@ -3,7 +3,6 @@
 
 #include "inspector_socket_server.h"
 #include "uv.h"
-#include "env.h"
 #include <v8.h>
 
 #include <deque>
@@ -12,7 +11,6 @@
 #include <condition_variable>
 #include <mutex>
 
-// Forward declaration to break recursive dependency chain with src/env.h.
 
 namespace v8_inspector {
 class StringBuffer;
@@ -20,6 +18,7 @@ class StringView;
 }  // namespace v8_inspector
 
 namespace inspector {
+using namespace v8;
 
 std::string FormatWsAddress(const std::string& host, int port,
                             const std::string& target_id,
@@ -42,7 +41,7 @@ enum class TransportAction {
 
 class InspectorIo {
  public:
-  InspectorIo(Environment *env, v8::Platform* platform,
+  InspectorIo(Isolate* isolate, Platform* platform,
               const std::string& path, bool wait_for_connect);
 
   ~InspectorIo();
@@ -133,8 +132,8 @@ class InspectorIo {
   // the parent object lifespan
   std::pair<uv_async_t, Agent*>* main_thread_req_;
   std::unique_ptr<InspectorSessionDelegate> session_delegate_;
-  v8::Platform* platform_;
-  Environment* parent_env_;
+  Platform* platform_;
+  Isolate* isolate_;
 
   // Message queues
   std::condition_variable incoming_message_cond_;
@@ -156,7 +155,7 @@ class InspectorIo {
 
   friend class DispatchMessagesTask;
   friend class IoSessionDelegate;
-  friend void InterruptCallback(v8::Isolate*, void* agent);
+  friend void InterruptCallback(Isolate*, void* agent);
 };
 
 std::unique_ptr<v8_inspector::StringBuffer> Utf8ToStringView(

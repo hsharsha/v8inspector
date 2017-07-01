@@ -122,7 +122,7 @@ void SendHttpResponse(InspectorSocket* socket, const std::string& response) {
 
 void SendVersionResponse(InspectorSocket* socket) {
   std::map<std::string, std::string> response;
-  response["Browser"] = "node.js";
+  response["Browser"] = "Couchbase";
   response["Protocol-Version"] = "1.1";
   SendHttpResponse(socket, MapToString(response));
 }
@@ -355,8 +355,7 @@ void InspectorSocketServer::SendListResponse(InspectorSocket* socket) {
   for (const std::string& id : delegate_->GetTargetIds()) {
     response.push_back(std::map<std::string, std::string>());
     std::map<std::string, std::string>& target_map = response.back();
-    target_map["description"] = "node.js instance";
-    target_map["faviconUrl"] = "https://nodejs.org/static/favicon.ico";
+    target_map["description"] = "couchbase inspector instance";
     target_map["id"] = id;
     target_map["title"] = delegate_->GetTargetTitle(id);
     Escape(&target_map["title"]);

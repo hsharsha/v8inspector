@@ -2,7 +2,6 @@
 
 #include "inspector_socket_server.h"
 #include "inspector_socket.h"
-#include "env.h"
 #include "v8-inspector.h"
 #include "v8-platform.h"
 #include "zlib.h"
@@ -19,6 +18,7 @@
 namespace inspector {
 namespace {
 using AsyncAndAgent = std::pair<uv_async_t, Agent*>;
+using namespace v8;
 using v8_inspector::StringBuffer;
 using v8_inspector::StringView;
 
@@ -32,7 +32,7 @@ std::string GetProcessTitle() {
     return title;
   } else {
     // Title is too long, or could not be retrieved.
-    return "Node.js";
+    return "Couchbase";
   }
 }
 
@@ -59,12 +59,12 @@ std::string GenerateID() {
   RAND_bytes(buffer, sizeof(buffer));
   char uuid[256];
   snprintf(uuid, sizeof(uuid), "%04x%04x-%04x-%04x-%04x-%04x%04x%04x",
-           buffer[0],  // time_low
-           buffer[1],  // time_mid
-           buffer[2],  // time_low
-           (buffer[3] & 0x0fff) | 0x4000,  // time_hi_and_version
-           (buffer[4] & 0x3fff) | 0x8000,  // clk_seq_hi clk_seq_low
-           buffer[5],  // node
+           buffer[0],
+           buffer[1],
+           buffer[2],
+           (buffer[3] & 0x0fff) | 0x4000,
+           (buffer[4] & 0x3fff) | 0x8000,
+           buffer[5],
            buffer[6],
            buffer[7]);
   return uuid;
@@ -168,13 +168,13 @@ class InspectorIoDelegate: public inspector::SocketServerDelegate {
   bool waiting_;
 };
 
-void InterruptCallback(v8::Isolate*, void* agent) {
+void InterruptCallback(Isolate*, void* agent) {
   InspectorIo* io = static_cast<Agent*>(agent)->io();
   if (io != nullptr)
     io->DispatchMessages();
 }
 
-class DispatchMessagesTask : public v8::Task {
+class DispatchMessagesTask : public Task {
  public:
   explicit DispatchMessagesTask(Agent* agent) : agent_(agent) {}
 
@@ -188,15 +188,15 @@ class DispatchMessagesTask : public v8::Task {
   Agent* agent_;
 };
 
-InspectorIo::InspectorIo(Environment* env, v8::Platform* platform,
+InspectorIo::InspectorIo(Isolate* isolate, Platform* platform,
                          const std::string& path, bool wait_for_connect)
                          : thread_(), delegate_(nullptr),
-                           state_(State::kNew), parent_env_(env),
+                           state_(State::kNew), isolate_(isolate),
                            thread_req_(), platform_(platform),
                            dispatching_messages_(false), session_id_(0),
                            script_name_(path),
                            wait_for_connect_(wait_for_connect), port_(9999) {
-  main_thread_req_ = new AsyncAndAgent({uv_async_t(), env->inspector_agent()});
+  main_thread_req_ = new AsyncAndAgent({uv_async_t(), static_cast<Agent *>(isolate->GetData(0))});
   assert(0 == uv_async_init(uv_default_loop(), &main_thread_req_->first,
                             InspectorIo::MainThreadReqAsyncCb));
   uv_unref(reinterpret_cast<uv_handle_t*>(&main_thread_req_->first));
@@ -251,7 +251,8 @@ void InspectorIo::WaitForDisconnect() {
     Write(TransportAction::kStop, 0, StringView());
     fprintf(stderr, "Waiting for the debugger to disconnect...\n");
     fflush(stderr);
-    parent_env_->inspector_agent()->RunMessageLoop();
+    Agent *agent = static_cast<Agent *>(isolate_->GetData(0));
+    agent->RunMessageLoop();
   }
 }
 
@@ -350,10 +351,9 @@ void InspectorIo::PostIncomingMessage(InspectorAction action, int session_id,
   if (AppendMessage(&incoming_message_queue_, action, session_id,
                     Utf8ToStringView(message))) {
     Agent* agent = main_thread_req_->second;
-    v8::Isolate* isolate = parent_env_->isolate();
-    platform_->CallOnForegroundThread(isolate,
+    platform_->CallOnForegroundThread(isolate_,
                                       new DispatchMessagesTask(agent));
-    isolate->RequestInterrupt(InterruptCallback, agent);
+    isolate_->RequestInterrupt(InterruptCallback, agent);
     assert(0 == uv_async_send(&main_thread_req_->first));
   }
   NotifyMessageReceived();
@@ -395,6 +395,7 @@ void InspectorIo::DispatchMessages() {
       std::swap(dispatching_message_queue_.front(), task);
       dispatching_message_queue_.pop_front();
       StringView message = std::get<2>(task)->string();
+      Agent *agent = static_cast<Agent *>(isolate_->GetData(0));
       switch (std::get<0>(task)) {
       case InspectorAction::kStartSession:
         assert(session_delegate_ == nullptr);
@@ -403,7 +404,7 @@ void InspectorIo::DispatchMessages() {
         fprintf(stderr, "Debugger attached.\n");
         session_delegate_ = std::unique_ptr<InspectorSessionDelegate>(
             new IoSessionDelegate(this));
-        parent_env_->inspector_agent()->Connect(session_delegate_.get());
+        agent->Connect(session_delegate_.get());
         break;
       case InspectorAction::kEndSession:
         assert(session_delegate_ != nullptr);
@@ -412,11 +413,11 @@ void InspectorIo::DispatchMessages() {
         } else {
           state_ = State::kAccepting;
         }
-        parent_env_->inspector_agent()->Disconnect();
+        agent->Disconnect();
         session_delegate_.reset();
         break;
       case InspectorAction::kSendMessage:
-        parent_env_->inspector_agent()->Dispatch(message);
+        agent->Dispatch(message);
         break;
       }
     }
@@ -469,10 +470,6 @@ bool InspectorIoDelegate::StartSession(int session_id,
 
 void InspectorIoDelegate::MessageReceived(int session_id,
                                           const std::string& message) {
-  // TODO(pfeldman): Instead of blocking execution while debugger
-  // engages, node should wait for the run callback from the remote client
-  // and initiate its startup. This is a change to node.cc that should be
-  // upstreamed separately.
   if (waiting_) {
     if (message.find("\"Runtime.runIfWaitingForDebugger\"") !=
         std::string::npos) {

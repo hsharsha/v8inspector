@@ -1,7 +1,6 @@
 #include "inspector_agent.h"
 
 #include "inspector_io.h"
-#include "env.h"
 #include "v8-inspector.h"
 #include "v8-platform.h"
 #include "util.h"
@@ -19,29 +18,12 @@
 
 namespace inspector {
 namespace {
-using v8::Context;
-using v8::External;
-using v8::Function;
-using v8::FunctionCallbackInfo;
-using v8::HandleScope;
-using v8::Isolate;
-using v8::Local;
-using v8::Maybe;
-using v8::MaybeLocal;
-using v8::NewStringType;
-using v8::Object;
-using v8::Persistent;
-using v8::String;
-using v8::Value;
-
-using v8_inspector::StringBuffer;
-using v8_inspector::StringView;
-using v8_inspector::V8Inspector;
+using namespace v8;
 
 static uv_sem_t start_io_thread_semaphore;
 static uv_async_t start_io_thread_async;
 
-class StartIoTask : public v8::Task {
+class StartIoTask : public Task {
  public:
   explicit StartIoTask(Agent* agent) : agent(agent) {}
 
@@ -54,20 +36,20 @@ class StartIoTask : public v8::Task {
 };
 
 void CallAndPauseOnStart(
-    const v8::FunctionCallbackInfo<v8::Value>& args) {
+    const FunctionCallbackInfo<Value>& args) {
   assert(args.Length() >= 1);
   assert(args[0]->IsFunction());
 
-  std::vector<v8::Local<v8::Value>> call_args;
+  std::vector<Local<Value>> call_args;
   for (int i = 1; i < args.Length(); i++) {
     call_args.push_back(args[i]);
   }
 
-  v8::Isolate *isolate = v8::Isolate::GetCurrent();
+  Isolate *isolate = Isolate::GetCurrent();
   Agent *agent = static_cast<Agent *>(isolate->GetData(0));
   agent->PauseOnNextJavascriptStatement("Break on start");
-  v8::MaybeLocal<v8::Value> retval =
-      args[0].As<v8::Function>()->Call(isolate->GetCurrentContext()->Global(),
+  MaybeLocal<Value> retval =
+      args[0].As<Function>()->Call(isolate->GetCurrentContext()->Global(),
                                        call_args.size(), call_args.data());
   if (!retval.IsEmpty()) {
     args.GetReturnValue().Set(retval.ToLocalChecked());
@@ -75,16 +57,16 @@ void CallAndPauseOnStart(
 }
 
 
-std::unique_ptr<StringBuffer> ToProtocolString(v8::Local<v8::Value> value) {
+std::unique_ptr<v8_inspector::StringBuffer> ToProtocolString(Local<Value> value) {
   if (value.IsEmpty() || value->IsNull() || value->IsUndefined() ||
       !value->IsString()) {
-    return StringBuffer::create(StringView());
+    return v8_inspector::StringBuffer::create(v8_inspector::StringView());
   }
-  v8::Local<v8::String> string_value = v8::Local<v8::String>::Cast(value);
+  Local<String> string_value = Local<String>::Cast(value);
   size_t len = string_value->Length();
   std::basic_string<uint16_t> buffer(len, '\0');
   string_value->Write(&buffer[0], 0, len);
-  return StringBuffer::create(StringView(buffer.data(), len));
+  return v8_inspector::StringBuffer::create(v8_inspector::StringView(buffer.data(), len));
 }
 
 // Called on the main thread.
@@ -96,21 +78,21 @@ void StartIoInterrupt(Isolate* isolate, void* agent) {
   static_cast<Agent*>(agent)->StartIoThread(false);
 }
 
-// Used in NodeInspectorClient::currentTimeMS() below.
+// Used in CBInspectorClient::currentTimeMS() below.
 const int NANOS_PER_MSEC = 1000000;
 const int CONTEXT_GROUP_ID = 1;
 
 class ChannelImpl final : public v8_inspector::V8Inspector::Channel {
  public:
-  explicit ChannelImpl(V8Inspector* inspector,
+  explicit ChannelImpl(v8_inspector::V8Inspector* inspector,
                        InspectorSessionDelegate* delegate)
                        : delegate_(delegate) {
-    session_ = inspector->connect(1, this, StringView());
+    session_ = inspector->connect(1, this, v8_inspector::StringView());
   }
 
   virtual ~ChannelImpl() {}
 
-  void dispatchProtocolMessage(const StringView& message) {
+  void dispatchProtocolMessage(const v8_inspector::StringView& message) {
     session_->dispatchProtocolMessage(message);
   }
 
@@ -119,7 +101,7 @@ class ChannelImpl final : public v8_inspector::V8Inspector::Channel {
   }
 
   void schedulePauseOnNextStatement(const std::string& reason) {
-    std::unique_ptr<StringBuffer> buffer = Utf8ToStringView(reason);
+    std::unique_ptr<v8_inspector::StringBuffer> buffer = Utf8ToStringView(reason);
     session_->schedulePauseOnNextStatement(buffer->string(), buffer->string());
   }
 
@@ -141,7 +123,7 @@ class ChannelImpl final : public v8_inspector::V8Inspector::Channel {
 
   void flushProtocolNotifications() override { }
 
-  void sendMessageToFrontend(const StringView& message) {
+  void sendMessageToFrontend(const v8_inspector::StringView& message) {
     delegate_->SendMessageToFrontend(message);
   }
 
@@ -151,14 +133,14 @@ class ChannelImpl final : public v8_inspector::V8Inspector::Channel {
 
 }  // namespace
 
-class NodeInspectorClient : public v8_inspector::V8InspectorClient {
+class CBInspectorClient : public v8_inspector::V8InspectorClient {
  public:
-  NodeInspectorClient(Environment* env,
-                      v8::Platform* platform) : env_(env),
+  CBInspectorClient(Isolate* isolate,
+                      Platform* platform) : isolate_(isolate),
                                                 platform_(platform),
                                                 terminated_(false),
                                                 running_nested_loop_(false) {
-    client_ = V8Inspector::create(env->isolate(), this);
+    client_ = v8_inspector::V8Inspector::create(isolate_, this);
   }
 
   void runMessageLoopOnPause(int context_group_id) override {
@@ -168,7 +150,7 @@ class NodeInspectorClient : public v8_inspector::V8InspectorClient {
     terminated_ = false;
     running_nested_loop_ = true;
     while (!terminated_ && channel_->waitForFrontendMessage()) {
-      while (v8::platform::PumpMessageLoop(platform_, env_->isolate()))
+      while (platform::PumpMessageLoop(platform_, isolate_))
         {}
     }
     terminated_ = false;
@@ -180,7 +162,7 @@ class NodeInspectorClient : public v8_inspector::V8InspectorClient {
   }
 
   void contextCreated(Local<Context> context, const std::string& name) {
-    std::unique_ptr<StringBuffer> name_buffer = Utf8ToStringView(name);
+    std::unique_ptr<v8_inspector::StringBuffer> name_buffer = Utf8ToStringView(name);
     v8_inspector::V8ContextInfo info(context, CONTEXT_GROUP_ID,
                                      name_buffer->string());
     client_->contextCreated(info);
@@ -205,21 +187,21 @@ class NodeInspectorClient : public v8_inspector::V8InspectorClient {
     channel_.reset();
   }
 
-  void dispatchMessageFromFrontend(const StringView& message) {
+  void dispatchMessageFromFrontend(const v8_inspector::StringView& message) {
     assert(channel_ != nullptr);
     channel_->dispatchProtocolMessage(message);
   }
 
   Local<Context> ensureDefaultContextInGroup(int contextGroupId) override {
-    return env_->context();
+    return isolate_->GetCurrentContext();
   }
 
-  void FatalException(Local<Value> error, Local<v8::Message> message) {
-    Local<Context> context = env_->context();
+  void FatalException(Local<Value> error, Local<Message> message) {
+    Local<Context> context = isolate_->GetCurrentContext();
 
     int script_id = message->GetScriptOrigin().ScriptID()->Value();
 
-    Local<v8::StackTrace> stack_trace = message->GetStackTrace();
+    Local<StackTrace> stack_trace = message->GetStackTrace();
 
     if (!stack_trace.IsEmpty() &&
         stack_trace->GetFrameCount() > 0 &&
@@ -229,11 +211,10 @@ class NodeInspectorClient : public v8_inspector::V8InspectorClient {
 
     const uint8_t DETAILS[] = "Uncaught";
 
-    Isolate* isolate = env_->isolate();
 
     client_->exceptionThrown(
         context,
-        StringView(DETAILS, sizeof(DETAILS) - 1),
+        v8_inspector::StringView(DETAILS, sizeof(DETAILS) - 1),
         error,
         ToProtocolString(message->Get())->string(),
         ToProtocolString(message->GetScriptResourceName())->string(),
@@ -248,15 +229,15 @@ class NodeInspectorClient : public v8_inspector::V8InspectorClient {
   }
 
  private:
-  Environment* env_;
-  v8::Platform* platform_;
+  Isolate* isolate_;
+  Platform* platform_;
   bool terminated_;
   bool running_nested_loop_;
-  std::unique_ptr<V8Inspector> client_;
+  std::unique_ptr<v8_inspector::V8Inspector> client_;
   std::unique_ptr<ChannelImpl> channel_;
 };
 
-Agent::Agent() : parent_env_(nullptr),
+Agent::Agent() : isolate_(nullptr),
                                  client_(nullptr),
                                  platform_(nullptr),
                                  enabled_(false) {}
@@ -266,18 +247,18 @@ Agent::Agent() : parent_env_(nullptr),
 Agent::~Agent() {
 }
 
-bool Agent::Start(Environment *env, v8::Platform* platform, const char* path) {
+bool Agent::Start(Isolate *isolate, Platform* platform, const char* path) {
   path_ = path == nullptr ? "" : path;
-  parent_env_ = env;
-  env->isolate()->SetData(0, this);
-  env->context()->Global()->Set(
-      v8::String::NewFromUtf8(env->isolate(), "callAndPauseOnStart", v8::NewStringType::kNormal)
+  isolate_ = isolate;
+  isolate->SetData(0, this);
+  isolate->GetCurrentContext()->Global()->Set(
+      String::NewFromUtf8(isolate, "callAndPauseOnStart", NewStringType::kNormal)
           .ToLocalChecked(),
-      v8::FunctionTemplate::New(env->isolate(), CallAndPauseOnStart)->GetFunction());
+      FunctionTemplate::New(isolate, CallAndPauseOnStart)->GetFunction());
   client_ =
-      std::unique_ptr<NodeInspectorClient>(
-          new NodeInspectorClient(parent_env_, platform));
-  client_->contextCreated(parent_env_->context(), "CB debugger context");
+      std::unique_ptr<CBInspectorClient>(
+          new CBInspectorClient(isolate_, platform));
+  client_->contextCreated(isolate_->GetCurrentContext(), "CB debugger context");
   platform_ = platform;
   assert(0 == uv_async_init(uv_default_loop(),
                             &start_io_thread_async,
@@ -300,7 +281,7 @@ bool Agent::StartIoThread(bool wait_for_connect) {
 
   enabled_ = true;
   io_ = std::unique_ptr<InspectorIo>(
-      new InspectorIo(parent_env_, platform_, path_, true));
+      new InspectorIo(isolate_, platform_, path_, true));
   if (!io_->Start()) {
     client_.reset();
     return false;
@@ -327,20 +308,20 @@ bool Agent::IsConnected() {
 
 void Agent::WaitForDisconnect() {
   assert(client_ != nullptr);
-  client_->contextDestroyed(parent_env_->context());
+  client_->contextDestroyed(isolate_->GetCurrentContext());
   if (io_ != nullptr) {
     io_->WaitForDisconnect();
   }
 }
 
-void Agent::FatalException(Local<Value> error, Local<v8::Message> message) {
+void Agent::FatalException(Local<Value> error, Local<Message> message) {
   if (!IsStarted())
     return;
   client_->FatalException(error, message);
   WaitForDisconnect();
 }
 
-void Agent::Dispatch(const StringView& message) {
+void Agent::Dispatch(const v8_inspector::StringView& message) {
   assert(client_ != nullptr);
   client_->dispatchMessageFromFrontend(message);
 }
@@ -370,13 +351,9 @@ void Agent::PauseOnNextJavascriptStatement(const std::string& reason) {
 }
 
 void Agent::RequestIoThreadStart() {
-  // We need to attempt to interrupt V8 flow (in case Node is running
-  // continuous JS code) and to wake up libuv thread (in case Node is waiting
-  // for IO events)
   uv_async_send(&start_io_thread_async);
-  v8::Isolate* isolate = parent_env_->isolate();
-  platform_->CallOnForegroundThread(isolate, new StartIoTask(this));
-  isolate->RequestInterrupt(StartIoInterrupt, this);
+  platform_->CallOnForegroundThread(isolate_, new StartIoTask(this));
+  isolate_->RequestInterrupt(StartIoInterrupt, this);
   uv_async_send(&start_io_thread_async);
 }
 
