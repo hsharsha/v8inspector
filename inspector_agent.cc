@@ -35,27 +35,6 @@ class StartIoTask : public Task {
   Agent* agent;
 };
 
-void CallAndPauseOnStart(
-    const FunctionCallbackInfo<Value>& args) {
-  assert(args.Length() >= 1);
-  assert(args[0]->IsFunction());
-
-  std::vector<Local<Value>> call_args;
-  for (int i = 1; i < args.Length(); i++) {
-    call_args.push_back(args[i]);
-  }
-
-  Isolate *isolate = Isolate::GetCurrent();
-  Agent *agent = static_cast<Agent *>(isolate->GetData(0));
-  agent->PauseOnNextJavascriptStatement("Break on start");
-  MaybeLocal<Value> retval =
-      args[0].As<Function>()->Call(isolate->GetCurrentContext()->Global(),
-                                       call_args.size(), call_args.data());
-  if (!retval.IsEmpty()) {
-    args.GetReturnValue().Set(retval.ToLocalChecked());
-  }
-}
-
 
 std::unique_ptr<v8_inspector::StringBuffer> ToProtocolString(Local<Value> value) {
   if (value.IsEmpty() || value->IsNull() || value->IsUndefined() ||
@@ -251,10 +230,6 @@ bool Agent::Start(Isolate *isolate, Platform* platform, const char* path) {
   path_ = path == nullptr ? "" : path;
   isolate_ = isolate;
   isolate->SetData(0, this);
-  isolate->GetCurrentContext()->Global()->Set(
-      String::NewFromUtf8(isolate, "callAndPauseOnStart", NewStringType::kNormal)
-          .ToLocalChecked(),
-      FunctionTemplate::New(isolate, CallAndPauseOnStart)->GetFunction());
   client_ =
       std::unique_ptr<CBInspectorClient>(
           new CBInspectorClient(isolate_, platform));

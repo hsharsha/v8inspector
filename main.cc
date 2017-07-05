@@ -72,19 +72,14 @@ bool ExecuteString(Isolate* isolate, Local<String> source,
         const char* cstr = ToCString(str);
         printf("%s\n", cstr);
       }
-      Handle<Value> callAndPauseOnStart = context->Global()->Get(
-        String::NewFromUtf8(isolate, "callAndPauseOnStart", NewStringType::kNormal)
-        .ToLocalChecked());
-      Handle<Function> callAndPauseOnStartFun = Handle<Function>::Cast(callAndPauseOnStart);
-      Handle<Value> exponent = context->Global()->Get(
+     Handle<Value> exponent = context->Global()->Get(
         String::NewFromUtf8(isolate, "exponent", NewStringType::kNormal)
         .ToLocalChecked());
       Handle<Function> expFun = Handle<Function>::Cast(exponent);
-      Handle<Value> arg[3];
-      arg[0] = expFun;
-      arg[1] = Integer::New(isolate, 10);
-      arg[2] = Integer::New(isolate, 2);
-      Handle<Value> js_result = callAndPauseOnStartFun->Call(Null(isolate), 3, arg);
+      Handle<Value> arg[2];
+      arg[0] = Integer::New(isolate, 10);
+      arg[1] = Integer::New(isolate, 2);
+      Handle<Value> js_result = expFun->Call(Null(isolate), 2, arg);
       return true;
     }
   }
@@ -141,6 +136,7 @@ int main(int argc, char* argv[]) {
 
     Agent *agent = new Agent();
     agent->Start(isolate, platform, argv[1]);
+    agent->PauseOnNextJavascriptStatement("Break on start");
 
     Local<String> file_name =
           String::NewFromUtf8(isolate, argv[1], NewStringType::kNormal)
