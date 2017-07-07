@@ -8,8 +8,13 @@
 #include <map>
 #include <set>
 #include <sstream>
-#include <cassert>
 #include <cstring>
+#ifndef STANDALONE_BUILD
+extern void(assert)(int);
+#else
+#include <cassert>
+#endif
+
 
 namespace inspector {
 

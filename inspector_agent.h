@@ -24,11 +24,11 @@ class CBInspectorClient;
 
 class Agent {
  public:
-   Agent();
+   __attribute__((visibility("default"))) Agent();
   ~Agent();
 
   // Create client_, may create io_ if option enabled
-  bool Start(Isolate* isolate, Platform* platform, const char* path);
+  __attribute__((visibility("default"))) bool Start(Isolate* isolate, Platform* platform, const char* path);
   // Stop and destroy io_
   void Stop();
 
@@ -40,7 +40,7 @@ class Agent {
 
   void WaitForDisconnect();
   void FatalException(Local<Value> error,
-                      Local<Message> message);
+                      v8::Local<v8::Message> message);
 
   // These methods are called by the WS protocol and JS binding to create
   // inspector sessions.  The inspector responds by using the delegate to send
@@ -52,7 +52,7 @@ class Agent {
 
   void RunMessageLoop();
   bool enabled() { return enabled_; }
-  void PauseOnNextJavascriptStatement(const std::string& reason);
+  __attribute__((visibility("default"))) void PauseOnNextJavascriptStatement(const std::string& reason);
 
   // Initialize 'inspector' module bindings
   static void InitInspector(Local<Object> target,

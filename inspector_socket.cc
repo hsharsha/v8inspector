@@ -6,7 +6,12 @@
 
 #include <string.h>
 #include <vector>
+#ifndef STANDALONE_BUILD
+extern void(assert)(int);
+#else
 #include <cassert>
+#endif
+
 
 #define ACCEPT_KEY_LENGTH base64_encoded_size(20)
 #define BUFFER_GROWTH_CHUNK_SIZE 1024

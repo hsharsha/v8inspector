@@ -10,7 +10,7 @@
 # permissions and limitations under the License.
 
 CXX=g++
-CXFLAGS= -std=c++11 -ggdb3 -fno-pie -fno-inline -fPIC -shared # -O3 -Wall
+CXFLAGS= -DSTANDALONE_BUILD=1 -std=c++11 -ggdb3 -fno-pie -fno-inline -fPIC -shared # -O3 -Wall
 
 
 LDFLAGS= -lz -lcrypto -lrt -L/usr/local/lib/ -luv -L$(HOME)/dev/v8/out/x64.release/lib.target/ -lv8  -lv8_libplatform -lv8_libbase -licui18n -licuuc
@@ -22,12 +22,13 @@ OUT=libinspector.so
 
 build:
 	python compress_json.py js_protocol.json v8_inspector_protocol_json.h
-	$(CXX) $(CXFLAGS) $(SOURCES) $(INCLUDE_DIRS) $(LDFLAGS) -o $(OUT)
+	$(CXX) $(CXFLAGS) $(SOURCES) $(INCLUDE_DIRS) -o $(OUT)
+	$(CXX) -std=c++11 -ggdb3 $(INCLUDE_DIRS) main.cc -L. -linspector $(LDFLAGS) -o inspector
 
 allopt:
 	python compress_json.py js_protocol.json v8_inspector_protocol_json.h
-	$(CXX) $(CXFLAGS) $(SOURCES) $(INCLUDE_DIRS) $(LDFLAGS) -O3 -o $(OUT)
-	$(CXX) -I. main.cc -L. -linspector
+	$(CXX) $(CXFLAGS) $(SOURCES) $(INCLUDE_DIRS) -O3 -o $(OUT)
+	$(CXX) -std=c++11 -ggdb3 $(INCLUDE_DIRS) main.cc -L. -linspector $(LDFLAGS) -O3 -o inspector
 
 clean:
 	-rm -rf $(OUT)

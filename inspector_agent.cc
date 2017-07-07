@@ -3,11 +3,15 @@
 #include "inspector_io.h"
 #include "v8-inspector.h"
 #include "v8-platform.h"
-#include "util.h"
 #include "zlib.h"
 
 #include "libplatform/libplatform.h"
+#ifndef STANDALONE_BUILD
+extern void(assert)(int);
+#else
 #include <cassert>
+#endif
+
 
 #include <string.h>
 #include <vector>

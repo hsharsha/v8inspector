@@ -2,7 +2,12 @@
 #define SRC_BASE64_H_
 
 #include <stddef.h>
+#ifndef STANDALONE_BUILD
+extern void(assert)(int);
+#else
 #include <cassert>
+#endif
+
 
 //// Base 64 ////
 #define base64_encoded_size(size) ((size + 2 - ((size + 2) % 3)) / 3 * 4)

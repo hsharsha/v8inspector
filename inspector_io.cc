@@ -11,8 +11,13 @@
 
 #include <string.h>
 #include <vector>
-#include <cassert>
 #include <openssl/rand.h>
+#ifndef STANDALONE_BUILD
+extern void(assert)(int);
+#else
+#include <cassert>
+#endif
+
 
 
 namespace inspector {
