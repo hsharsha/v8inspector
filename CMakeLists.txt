@@ -18,11 +18,13 @@ ENDIF (${CMAKE_MAJOR_VERSION} GREATER 2)
 PROJECT (v8inspector)
 
 INCLUDE (FindCouchbaseEventingDep)
+INCLUDE (FindCouchbaseOpenSSL)
 
 INCLUDE_DIRECTORIES(BEFORE ${LIBUV_INCLUDE_DIR})
 
 INCLUDE_DIRECTORIES(AFTER  ${ICU_INCLUDE_DIR}
                            ${V8_INCLUDE_DIR}
+                           ${OPENSSL_INCLUDE_DIR}
                            ${V8_INCLUDE_DIR}/include
                            ${CMAKE_CURRENT_SOURCE_DIR}
                            ${Platform_SOURCE_DIR}/include
@@ -31,9 +33,9 @@ INCLUDE_DIRECTORIES(AFTER  ${ICU_INCLUDE_DIR}
 EXECUTE_PROCESS(COMMAND python compress_json.py js_protocol.json v8_inspector_protocol_json.h
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
-SET(V8INSPECTOR_SOURCES assert.c http_parser.c inspector_agent.cc
+SET(V8INSPECTOR_SOURCES assert.cc http_parser.cc inspector_agent.cc
     inspector_io.cc inspector_socket.cc inspector_socket_server.cc)
-SET(V8INSPECTOR_LIBRARIES ${V8_LIBRARIES} ${ICU_LIBRARIES} -lz ${LIBUV_LIBRARIES} platform)
+SET(V8INSPECTOR_LIBRARIES ${V8_LIBRARIES} ${ICU_LIBRARIES} -lz ${LIBUV_LIBRARIES} platform ${OPENSSL_CRYPT_LIBRARY})
 ADD_LIBRARY(v8inspector SHARED ${V8INSPECTOR_SOURCES})
 SET_TARGET_PROPERTIES(v8inspector PROPERTIES POSITION_INDEPENDENT_CODE true)
 TARGET_LINK_LIBRARIES(v8inspector ${V8INSPECTOR_LIBRARIES})

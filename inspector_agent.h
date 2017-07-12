@@ -2,6 +2,7 @@
 #define SRC_INSPECTOR_AGENT_H_
 
 #include <memory>
+#include <string>
 #include "v8.h"
 #include "v8-inspector.h"
 
