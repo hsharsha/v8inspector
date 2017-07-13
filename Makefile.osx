@@ -1,0 +1,32 @@
+# Copyright (c) 2017 Couchbase, Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an "AS IS"
+# BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing
+# permissions and limitations under the License.
+
+CXX=g++
+CXFLAGS= -DSTANDALONE_BUILD=1 -std=c++11 -ggdb3 -fno-pie -fno-inline #-fPIC -shared # -O3 -Wall
+
+
+LDFLAGS= -lz -L/usr/local/lib/ -luv -L$(HOME)/.cbdepscache/lib -lcrypto -lv8  -lv8_libplatform -lv8_libbase  -licui18n -licuuc
+SOURCES=http_parser.cc inspector_socket.cc inspector_socket_server.cc inspector_io.cc inspector_agent.cc main.cc
+
+INCLUDE_DIRS=-I. -I/$(HOME)/.cbdepscache/include
+
+OUT=inspector
+
+build:
+	python compress_json.py js_protocol.json v8_inspector_protocol_json.h
+	$(CXX) $(CXFLAGS) $(SOURCES) $(INCLUDE_DIRS) $(LDFLAGS) -o $(OUT)
+
+allopt:
+	python compress_json.py js_protocol.json v8_inspector_protocol_json.h
+	$(CXX) $(CXFLAGS) $(SOURCES) $(INCLUDE_DIRS) $(LDFLAGS) -O3 -o $(OUT)
+
+clean:
+	-rm -rf $(OUT)
