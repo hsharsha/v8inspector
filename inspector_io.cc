@@ -194,13 +194,14 @@ class DispatchMessagesTask : public Task {
 };
 
 InspectorIo::InspectorIo(Isolate* isolate, Platform* platform,
-                         const std::string& path, bool wait_for_connect)
+                         const std::string& path, std::string host_name,
+                         bool wait_for_connect)
                          : thread_(), delegate_(nullptr),
                            state_(State::kNew), isolate_(isolate),
                            thread_req_(), platform_(platform),
                            dispatching_messages_(false), session_id_(0),
                            script_name_(path),
-                           wait_for_connect_(wait_for_connect), port_(9999) {
+                           wait_for_connect_(wait_for_connect), host_name_(host_name), port_(9999) {
   main_thread_req_ = new AsyncAndAgent({uv_async_t(), static_cast<Agent *>(isolate->GetData(0))});
   assert(0 == uv_async_init(uv_default_loop(), &main_thread_req_->first,
                             InspectorIo::MainThreadReqAsyncCb));
@@ -308,7 +309,7 @@ void InspectorIo::ThreadMain() {
   InspectorIoDelegate delegate(this, script_path, script_name_,
                                wait_for_connect_);
   delegate_ = &delegate;
-  Transport server(&delegate, &loop, "172.31.0.219", port_);
+  Transport server(&delegate, &loop, host_name_, port_);
   TransportAndIo<Transport> queue_transport(&server, this);
   thread_req_.data = &queue_transport;
   if (!server.Start()) {

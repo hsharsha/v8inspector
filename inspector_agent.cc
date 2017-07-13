@@ -220,10 +220,11 @@ class CBInspectorClient : public v8_inspector::V8InspectorClient {
   std::unique_ptr<ChannelImpl> channel_;
 };
 
-Agent::Agent() : isolate_(nullptr),
+Agent::Agent(std::string host_name) : isolate_(nullptr),
                                  client_(nullptr),
                                  platform_(nullptr),
-                                 enabled_(false) {}
+                                 enabled_(false),
+                                 host_name_(host_name){}
 
 // Destructor needs to be defined here in implementation file as the header
 // does not have full definition of some classes.
@@ -260,7 +261,7 @@ bool Agent::StartIoThread(bool wait_for_connect) {
 
   enabled_ = true;
   io_ = std::unique_ptr<InspectorIo>(
-      new InspectorIo(isolate_, platform_, path_, true));
+      new InspectorIo(isolate_, platform_, path_, host_name_, true));
   if (!io_->Start()) {
     client_.reset();
     return false;

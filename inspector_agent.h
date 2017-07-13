@@ -25,7 +25,7 @@ class CBInspectorClient;
 
 class Agent {
  public:
-   __attribute__((visibility("default"))) Agent();
+   __attribute__((visibility("default"))) Agent(std::string host_name);
   ~Agent();
 
   // Create client_, may create io_ if option enabled
@@ -78,6 +78,7 @@ class Agent {
   Isolate* isolate_;
   bool enabled_;
   std::string path_;
+  std::string host_name_;
 };
 
 }  // namespace inspector

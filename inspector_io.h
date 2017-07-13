@@ -42,7 +42,7 @@ enum class TransportAction {
 class InspectorIo {
  public:
   InspectorIo(Isolate* isolate, Platform* platform,
-              const std::string& path, bool wait_for_connect);
+              const std::string& path, std::string host_name, bool wait_for_connect);
 
   ~InspectorIo();
   // Start the inspector agent thread, waiting for it to initialize,
