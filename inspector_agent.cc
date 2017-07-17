@@ -234,7 +234,7 @@ Agent::~Agent() {
 bool Agent::Start(Isolate *isolate, Platform* platform, const char* path) {
   path_ = path == nullptr ? "" : path;
   isolate_ = isolate;
-  isolate->SetData(0, this);
+  isolate->SetData(5, this);
   client_ =
       std::unique_ptr<CBInspectorClient>(
           new CBInspectorClient(isolate_, platform));

@@ -202,7 +202,7 @@ InspectorIo::InspectorIo(Isolate* isolate, Platform* platform,
                            dispatching_messages_(false), session_id_(0),
                            script_name_(path),
                            wait_for_connect_(wait_for_connect), host_name_(host_name), port_(9999) {
-  main_thread_req_ = new AsyncAndAgent({uv_async_t(), static_cast<Agent *>(isolate->GetData(0))});
+  main_thread_req_ = new AsyncAndAgent({uv_async_t(), static_cast<Agent *>(isolate->GetData(5))});
   assert(0 == uv_async_init(uv_default_loop(), &main_thread_req_->first,
                             InspectorIo::MainThreadReqAsyncCb));
   uv_unref(reinterpret_cast<uv_handle_t*>(&main_thread_req_->first));
@@ -257,7 +257,7 @@ void InspectorIo::WaitForDisconnect() {
     Write(TransportAction::kStop, 0, StringView());
     fprintf(stderr, "Waiting for the debugger to disconnect...\n");
     fflush(stderr);
-    Agent *agent = static_cast<Agent *>(isolate_->GetData(0));
+    Agent *agent = static_cast<Agent *>(isolate_->GetData(5));
     agent->RunMessageLoop();
   }
 }
@@ -401,7 +401,7 @@ void InspectorIo::DispatchMessages() {
       std::swap(dispatching_message_queue_.front(), task);
       dispatching_message_queue_.pop_front();
       StringView message = std::get<2>(task)->string();
-      Agent *agent = static_cast<Agent *>(isolate_->GetData(0));
+      Agent *agent = static_cast<Agent *>(isolate_->GetData(5));
       switch (std::get<0>(task)) {
       case InspectorAction::kStartSession:
         assert(session_delegate_ == nullptr);
