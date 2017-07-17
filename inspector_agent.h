@@ -26,12 +26,12 @@ class CBInspectorClient;
 class Agent {
  public:
    __attribute__((visibility("default"))) Agent(std::string host_name);
-  ~Agent();
+  __attribute__((visibility("default"))) ~Agent();
 
   // Create client_, may create io_ if option enabled
   __attribute__((visibility("default"))) bool Start(Isolate* isolate, Platform* platform, const char* path);
   // Stop and destroy io_
-  void Stop();
+  __attribute__((visibility("default"))) void Stop();
 
   bool IsStarted() { return !!client_; }
 
