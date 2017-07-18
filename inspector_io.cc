@@ -202,7 +202,7 @@ InspectorIo::InspectorIo(Isolate* isolate, Platform* platform,
                            dispatching_messages_(false), session_id_(0),
                            script_name_(path),
                            wait_for_connect_(wait_for_connect), host_name_(host_name), port_(9999) {
-  main_thread_req_ = new AsyncAndAgent({uv_async_t(), static_cast<Agent *>(isolate->GetData(5))});
+  main_thread_req_ = new AsyncAndAgent({uv_async_t(), static_cast<Agent *>(isolate->GetData(4))});
   assert(0 == uv_async_init(uv_default_loop(), &main_thread_req_->first,
                             InspectorIo::MainThreadReqAsyncCb));
   uv_unref(reinterpret_cast<uv_handle_t*>(&main_thread_req_->first));
@@ -257,7 +257,7 @@ void InspectorIo::WaitForDisconnect() {
     Write(TransportAction::kStop, 0, StringView());
     fprintf(stderr, "Waiting for the debugger to disconnect...\n");
     fflush(stderr);
-    Agent *agent = static_cast<Agent *>(isolate_->GetData(5));
+    Agent *agent = static_cast<Agent *>(isolate_->GetData(4));
     agent->RunMessageLoop();
   }
 }
@@ -289,7 +289,7 @@ void InspectorIo::IoThreadAsyncCb(uv_async_t* async) {
       break;
     case TransportAction::kSendMessage:
       std::string message = StringViewToUtf8(std::get<2>(outgoing)->string());
-      //printf("%d %s sending message %s \n", __LINE__, __FILE__, message.c_str());
+      //fprintf(stderr, "%d %s sending message %s \n", __LINE__, __FILE__, message.c_str());
       transport->Send(std::get<1>(outgoing), message);
       break;
     }
@@ -353,7 +353,7 @@ void InspectorIo::SwapBehindLock(MessageQueue<ActionType>* vector1,
 
 void InspectorIo::PostIncomingMessage(InspectorAction action, int session_id,
                                       const std::string& message) {
-    //printf("%s %d appending action %d session %d and  message %s\n", __FILE__, __LINE__, action, session_id, message.c_str());
+    //fprintf(stderr, "%s %d appending action %d session %d and  message %s\n", __FILE__, __LINE__, action, session_id, message.c_str());
   if (AppendMessage(&incoming_message_queue_, action, session_id,
                     Utf8ToStringView(message))) {
     Agent* agent = main_thread_req_->second;
@@ -401,7 +401,7 @@ void InspectorIo::DispatchMessages() {
       std::swap(dispatching_message_queue_.front(), task);
       dispatching_message_queue_.pop_front();
       StringView message = std::get<2>(task)->string();
-      Agent *agent = static_cast<Agent *>(isolate_->GetData(5));
+      Agent *agent = static_cast<Agent *>(isolate_->GetData(4));
       switch (std::get<0>(task)) {
       case InspectorAction::kStartSession:
         assert(session_delegate_ == nullptr);

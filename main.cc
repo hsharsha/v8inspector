@@ -17,7 +17,7 @@ using namespace inspector;
 MaybeLocal<String> ReadFile(Isolate* isolate, const char* name);
 bool ExecuteString(Isolate* isolate, Local<String> source,
                    Local<Value> name, bool print_result,
-                   bool report_exceptions);
+                   bool report_exceptions, Agent* agent);
 // Reads a file into a v8 string.
 MaybeLocal<String> ReadFile(Isolate* isolate, const char* name) {
   FILE* file = fopen(name, "rb");
@@ -50,7 +50,7 @@ const char* ToCString(const String::Utf8Value& value) {
 // Executes a string within the current v8 context.
 bool ExecuteString(Isolate* isolate, Local<String> source,
                    Local<Value> name, bool print_result,
-                   bool report_exceptions) {
+                   bool report_exceptions, Agent* agent) {
   HandleScope handle_scope(isolate);
   TryCatch try_catch(isolate);
   ScriptOrigin origin(name);
@@ -80,6 +80,10 @@ bool ExecuteString(Isolate* isolate, Local<String> source,
       arg[0] = Integer::New(isolate, 10);
       arg[1] = Integer::New(isolate, 2);
       Handle<Value> js_result = expFun->Call(Null(isolate), 2, arg);
+      if (try_catch.HasCaught()) {
+        agent->FatalException(try_catch.Exception(), try_catch.Message());
+      }
+
       return true;
     }
   }
@@ -109,7 +113,7 @@ int main(int argc, char* argv[]) {
   // Initialize V8.
   V8::InitializeICUDefaultLocation(argv[0]);
   V8::InitializeExternalStartupData(argv[0]);
-  Platform* platform = platform::CreateDefaultPlatform(4);
+  Platform* platform = platform::CreateDefaultPlatform();
   V8::InitializePlatform(platform);
   V8::Initialize();
 
@@ -134,7 +138,7 @@ int main(int argc, char* argv[]) {
     Local<Context> context = Context::New(isolate, NULL, global);
     Context::Scope context_scope(context);
 
-    Agent *agent = new Agent("127.0.0.1");
+    Agent *agent = new Agent("172.31.0.219");
     agent->Start(isolate, platform, argv[1]);
     agent->PauseOnNextJavascriptStatement("Break on start");
 
@@ -146,7 +150,7 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "Error reading '%s'\n", argv[1]);
         return 1;
       }
-      bool success = ExecuteString(isolate, source, file_name, false, true);
+      bool success = ExecuteString(isolate, source, file_name, false, true, agent);
       while (platform::PumpMessageLoop(platform, isolate)) {};
       if (!success) return 1;
   }
