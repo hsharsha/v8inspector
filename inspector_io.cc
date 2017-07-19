@@ -201,7 +201,7 @@ InspectorIo::InspectorIo(Isolate* isolate, Platform* platform,
                            thread_req_(), platform_(platform),
                            dispatching_messages_(false), session_id_(0),
                            script_name_(path),
-                           wait_for_connect_(wait_for_connect), host_name_(host_name), port_(9999) {
+                           wait_for_connect_(wait_for_connect), host_name_(host_name), port_(0) {
   main_thread_req_ = new AsyncAndAgent({uv_async_t(), static_cast<Agent *>(isolate->GetData(4))});
   assert(0 == uv_async_init(uv_default_loop(), &main_thread_req_->first,
                             InspectorIo::MainThreadReqAsyncCb));
