@@ -108,7 +108,8 @@ void PrintDebuggerReadyMessage(const std::string& host,
     frontend_url = "chrome-devtools://devtools/bundled";
     frontend_url += "/inspector.html?experiments=true&v8only=true&ws=";
     frontend_url += FormatWsAddress(host, port, id, false);
-    fprintf(out, "Debugger listening on %s\n", frontend_url.c_str());
+    fprintf(out, "%s\n", frontend_url.c_str());
+    fprintf(stderr, "Debugger starting on %s\n", frontend_url.c_str());
   }
   fflush(out);
 }
