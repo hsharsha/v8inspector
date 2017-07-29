@@ -10,18 +10,18 @@
 # permissions and limitations under the License.
 
 CXX=g++
-CXFLAGS= -DSTANDALONE_BUILD=1 -std=c++11 -ggdb3 -fno-pie -fno-inline -fPIC -shared # -O3 -Wall
+CXFLAGS= -DSTANDALONE_BUILD=1 -std=c++11 -ggdb3 -fno-pie -fno-inline -dynamiclib# -O3 -Wall
 
 
-LDFLAGS= -lz -lcrypto -lrt -L/usr/local/lib/ -luv -L$(HOME)/.cbdepscache/lib -lv8  -lv8_libplatform -lv8_libbase -licui18n -licuuc
+LDFLAGS= -lz -luv -L$(HOME)/.cbdepscache/lib -lv8  -lv8_libplatform -lv8_libbase -licui18n -licuuc -lcrypto
 SOURCES=http_parser.cc inspector_socket.cc inspector_socket_server.cc inspector_io.cc inspector_agent.cc
 
 INCLUDE_DIRS=-I. -I/$(HOME)/.cbdepscache/include
-OUT=libinspector.so
+OUT=libinspector.dylib
 
 build:
 	python compress_json.py js_protocol.json v8_inspector_protocol_json.h
-	$(CXX) $(CXFLAGS) $(SOURCES) $(INCLUDE_DIRS) -o $(OUT)
+	$(CXX) $(CXFLAGS) $(SOURCES) $(INCLUDE_DIRS) $(LDFLAGS) -o $(OUT)
 	$(CXX) -std=c++11 -ggdb3 $(INCLUDE_DIRS) main.cc -L. -linspector $(LDFLAGS) -o inspector
 
 allopt:
