@@ -16,8 +16,10 @@ This project depends on following libraries
 
 ## Build Instructions
 ```shell
-$ mkdir build
-$ cmake /path/to/v8inspector/CMakeLists.txt
+$ mkdir build && cd build
+$ cmake ..
 $ make
+# To run the binary
+$ ./inspector ../sample.js
 ```
 
