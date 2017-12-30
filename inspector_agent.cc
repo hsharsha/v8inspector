@@ -1,3 +1,25 @@
+/*
+*    Copyright Node.js contributors. All rights reserved.
+*
+*    Permission is hereby granted, free of charge, to any person obtaining a copy
+*    of this software and associated documentation files (the "Software"), to
+*    deal in the Software without restriction, including without limitation the
+*    rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+*    sell copies of the Software, and to permit persons to whom the Software is
+*    furnished to do so, subject to the following conditions:
+*
+*    The above copyright notice and this permission notice shall be included in
+*    all copies or substantial portions of the Software.
+*
+*    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+*    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+*    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+*    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+*    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+*    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+*    IN THE SOFTWARE.
+*/
+
 #include "inspector_agent.h"
 
 #include "inspector_io.h"
@@ -6,11 +28,7 @@
 #include "zlib.h"
 
 #include "libplatform/libplatform.h"
-#ifndef STANDALONE_BUILD
-extern void(assert)(int);
-#else
 #include <cassert>
-#endif
 
 
 #include <string.h>
@@ -235,7 +253,6 @@ Agent::~Agent() {
 bool Agent::Start(Isolate *isolate, Platform* platform, const char* path) {
   path_ = path == nullptr ? "" : path;
   isolate_ = isolate;
-  isolate->SetData(4, this);
   client_ =
       std::unique_ptr<CBInspectorClient>(
           new CBInspectorClient(isolate_, platform));
@@ -262,7 +279,7 @@ bool Agent::StartIoThread(bool wait_for_connect) {
 
   enabled_ = true;
   io_ = std::unique_ptr<InspectorIo>(
-      new InspectorIo(isolate_, platform_, path_, host_name_, true, file_path_));
+      new InspectorIo(isolate_, platform_, path_, host_name_, true, file_path_, this));
   if (!io_->Start()) {
     client_.reset();
     return false;

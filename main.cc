@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
     Local<Context> context = Context::New(isolate, NULL, global);
     Context::Scope context_scope(context);
 
-    Agent *agent = new Agent("172.31.0.219", "/tmp/frontend.url");
+    Agent *agent = new Agent("localhost", "/tmp/frontend.url");
     agent->Start(isolate, platform, argv[1]);
     agent->PauseOnNextJavascriptStatement("Break on start");
 

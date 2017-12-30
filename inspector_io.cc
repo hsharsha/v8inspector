@@ -1,7 +1,29 @@
-#include "inspector_io.h"
+/*
+*    Copyright Node.js contributors. All rights reserved.
+*
+*    Permission is hereby granted, free of charge, to any person obtaining a copy
+*    of this software and associated documentation files (the "Software"), to
+*    deal in the Software without restriction, including without limitation the
+*    rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+*    sell copies of the Software, and to permit persons to whom the Software is
+*    furnished to do so, subject to the following conditions:
+*
+*    The above copyright notice and this permission notice shall be included in
+*    all copies or substantial portions of the Software.
+*
+*    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+*    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+*    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+*    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+*    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+*    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+*    IN THE SOFTWARE.
+*/
 
+#include "inspector_io.h"
 #include "inspector_socket_server.h"
 #include "inspector_socket.h"
+#include "inspector_agent.h"
 #include "v8-inspector.h"
 #include "v8-platform.h"
 #include "zlib.h"
@@ -12,13 +34,7 @@
 #include <string.h>
 #include <vector>
 #include <openssl/rand.h>
-#ifndef STANDALONE_BUILD
-extern void(assert)(int);
-#else
 #include <cassert>
-#endif
-
-
 
 namespace inspector {
 namespace {
@@ -37,7 +53,7 @@ std::string GetProcessTitle() {
     return title;
   } else {
     // Title is too long, or could not be retrieved.
-    return "Couchbase";
+    return "v8inspector";
   }
 }
 
@@ -195,15 +211,16 @@ class DispatchMessagesTask : public Task {
 
 InspectorIo::InspectorIo(Isolate* isolate, Platform* platform,
                          const std::string& path, std::string host_name,
-                         bool wait_for_connect, std::string file_path)
+                         bool wait_for_connect, std::string file_path,
+                         Agent *agent)
                          : thread_(), delegate_(nullptr),
                            state_(State::kNew), isolate_(isolate),
                            thread_req_(), platform_(platform),
                            dispatching_messages_(false), session_id_(0),
                            script_name_(path),
                            wait_for_connect_(wait_for_connect), host_name_(host_name), port_(0),
-                           file_path_(file_path){
-  main_thread_req_ = new AsyncAndAgent({uv_async_t(), static_cast<Agent *>(isolate->GetData(4))});
+                           file_path_(file_path), agent_(agent){
+  main_thread_req_ = new AsyncAndAgent({uv_async_t(), agent_});
   assert(0 == uv_async_init(uv_default_loop(), &main_thread_req_->first,
                             InspectorIo::MainThreadReqAsyncCb));
   uv_unref(reinterpret_cast<uv_handle_t*>(&main_thread_req_->first));
@@ -258,8 +275,7 @@ void InspectorIo::WaitForDisconnect() {
     Write(TransportAction::kStop, 0, StringView());
     fprintf(stderr, "Waiting for the debugger to disconnect...\n");
     fflush(stderr);
-    Agent *agent = static_cast<Agent *>(isolate_->GetData(4));
-    agent->RunMessageLoop();
+    agent_->RunMessageLoop();
   }
 }
 
@@ -402,7 +418,6 @@ void InspectorIo::DispatchMessages() {
       std::swap(dispatching_message_queue_.front(), task);
       dispatching_message_queue_.pop_front();
       StringView message = std::get<2>(task)->string();
-      Agent *agent = static_cast<Agent *>(isolate_->GetData(4));
       switch (std::get<0>(task)) {
       case InspectorAction::kStartSession:
         assert(session_delegate_ == nullptr);
@@ -411,7 +426,7 @@ void InspectorIo::DispatchMessages() {
         fprintf(stderr, "Debugger attached.\n");
         session_delegate_ = std::unique_ptr<InspectorSessionDelegate>(
             new IoSessionDelegate(this));
-        agent->Connect(session_delegate_.get());
+        agent_->Connect(session_delegate_.get());
         break;
       case InspectorAction::kEndSession:
         assert(session_delegate_ != nullptr);
@@ -420,11 +435,11 @@ void InspectorIo::DispatchMessages() {
         } else {
           state_ = State::kAccepting;
         }
-        agent->Disconnect();
+        agent_->Disconnect();
         session_delegate_.reset();
         break;
       case InspectorAction::kSendMessage:
-        agent->Dispatch(message);
+        agent_->Dispatch(message);
         break;
       }
     }
