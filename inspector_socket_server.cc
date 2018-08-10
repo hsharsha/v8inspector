@@ -124,7 +124,7 @@ void PrintDebuggerReadyMessage(const std::string& host,
   for (const std::string& id : ids) {
     std::string frontend_url;
     frontend_url = "chrome-devtools://devtools/bundled";
-    frontend_url += "/inspector.html?experiments=true&v8only=true&ws=";
+    frontend_url += "/js_app.html?experiments=true&v8only=true&ws=";
     frontend_url += FormatWsAddress(host, port, id, false);
     fprintf(out, "%s\n", frontend_url.c_str());
     fprintf(stderr, "Debugger starting on %s\n", frontend_url.c_str());
@@ -402,7 +402,7 @@ void InspectorSocketServer::SendListResponse(InspectorSocket* socket) {
       GetSocketHost(&socket->tcp, &host);
       std::ostringstream frontend_url;
       frontend_url << "chrome-devtools://devtools/bundled";
-      frontend_url << "/inspector.html?experiments=true&v8only=true&ws=";
+      frontend_url << "/js_app.html?experiments=true&v8only=true&ws=";
       frontend_url << FormatWsAddress(host, port, id, false);
       target_map["devtoolsFrontendUrl"] += frontend_url.str();
       target_map["webSocketDebuggerUrl"] =
