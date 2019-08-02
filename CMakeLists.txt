@@ -12,26 +12,14 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
 PROJECT (v8inspector)
 
-#INCLUDE (FindV8.cmake)
-#INCLUDE (FindICU.cmake)
+INCLUDE (FindV8.cmake)
+INCLUDE (FindICU.cmake)
 INCLUDE (FindLZ.cmake)
-#INCLUDE (FindLIBUV.cmake)
+INCLUDE (FindLIBUV.cmake)
 INCLUDE (FindOPENSSL.cmake)
 
-SET(V8_INCLUDE_DIR /Users/gautham/.cbdepscache/include)
-SET(V8_LIBRARIES
-        /Users/gautham/.cbdepscache/lib/libv8.dylib
-        /Users/gautham/.cbdepscache/lib/libv8_libplatform.dylib
-        /Users/gautham/.cbdepscache/lib/libv8_libbase.dylib)
-
-SET(ICU_LIBRARIES
-        /Users/gautham/.cbdepscache/lib/libicui18n.dylib
-        /Users/gautham/.cbdepscache/lib/libicuuc.dylib)
-
-SET(LIBUV_LIBRARIES
-        /Users/gautham/.cbdepscache/lib/libuv.dylib)
-
-INCLUDE_DIRECTORIES(
+INCLUDE_DIRECTORIES( ${ICU_INCLUDE_DIR}
+                     ${LIBUV_INCLUDE_DIR}
                      ${V8_INCLUDE_DIR}
                      ${OPENSSL_INCLUDE_DIR}
                      ${V8_INCLUDE_DIR}/include
