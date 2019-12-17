@@ -30,6 +30,10 @@
 
 #include <stddef.h>
 
+#ifdef WIN32
+#define __attribute__(x) __declspec(dllexport) 
+#endif
+
 namespace inspector {
 
 using namespace v8;
@@ -62,7 +66,7 @@ class Agent {
 
 
   void WaitForDisconnect();
-  void FatalException(Local<Value> error,
+   __attribute__((visibility("default"))) void FatalException(Local<Value> error,
                       v8::Local<v8::Message> message);
 
   // These methods are called by the WS protocol and JS binding to create
