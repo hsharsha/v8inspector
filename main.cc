@@ -68,7 +68,7 @@ bool ExecuteString(Isolate* isolate, Local<String> source,
       if (print_result && !result->IsUndefined()) {
         // If all went well and the result wasn't undefined then print
         // the returned value.
-        String::Utf8Value str(result);
+        String::Utf8Value str(isolate, result);
         const char* cstr = ToCString(str);
         printf("%s\n", cstr);
       }
@@ -101,7 +101,7 @@ void Print(const FunctionCallbackInfo<Value>& args) {
     } else {
       printf(" ");
     }
-    String::Utf8Value str(args[i]);
+    String::Utf8Value str(args.GetIsolate(), args[i]);
     const char* cstr = ToCString(str);
     printf("%s", cstr);
   }
