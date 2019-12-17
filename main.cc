@@ -64,24 +64,14 @@ bool ExecuteString(Isolate* isolate, Local<String> source,
       assert(try_catch.HasCaught());
       return false;
     } else {
-      assert(!try_catch.HasCaught());
-      if (print_result && !result->IsUndefined()) {
+      if (try_catch.HasCaught()) 
+        agent->FatalException(try_catch.Exception(), try_catch.Message());
+      else if (print_result && !result->IsUndefined()) {
         // If all went well and the result wasn't undefined then print
         // the returned value.
         String::Utf8Value str(isolate, result);
         const char* cstr = ToCString(str);
         printf("%s\n", cstr);
-      }
-     Handle<Value> exponent = context->Global()->Get(
-        String::NewFromUtf8(isolate, "exponent", NewStringType::kNormal)
-        .ToLocalChecked());
-      Handle<Function> expFun = Handle<Function>::Cast(exponent);
-      Handle<Value> arg[2];
-      arg[0] = Integer::New(isolate, 10);
-      arg[1] = Integer::New(isolate, 2);
-      Handle<Value> js_result = expFun->Call(Null(isolate), 2, arg);
-      if (try_catch.HasCaught()) {
-        agent->FatalException(try_catch.Exception(), try_catch.Message());
       }
 
       return true;
