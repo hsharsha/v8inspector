@@ -326,7 +326,14 @@ void InspectorIo::ThreadMain() {
   InspectorIoDelegate delegate(this, script_path, script_name_,
                                wait_for_connect_);
   delegate_ = &delegate;
-  Transport server(&delegate, &loop, host_name_, port_, fopen(file_path_.c_str(), "w"));
+  FILE *jsFile = fopen(file_path_.c_str(), "w");
+  if(! jsFile) 
+  {
+     fprintf(stderr, "Unable to open file %s\n", file_path_.c_str());
+     return;
+  }
+  Transport server(&delegate, &loop, host_name_, port_, jsFile);
+
   TransportAndIo<Transport> queue_transport(&server, this);
   thread_req_.data = &queue_transport;
   if (!server.Start()) {
@@ -343,6 +350,7 @@ void InspectorIo::ThreadMain() {
   thread_req_.data = nullptr;
   assert(uv_loop_close(&loop) ==  0);
   delegate_ = nullptr;
+  fclose(jsFile);
 }
 
 template <typename ActionType>
