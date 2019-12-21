@@ -25,6 +25,7 @@
 
 #include <memory>
 #include <string>
+#include <functional>
 #include "v8.h"
 #include "v8-inspector.h"
 
@@ -51,7 +52,9 @@ class CBInspectorClient;
 
 class Agent {
  public:
-   __attribute__((visibility("default"))) Agent(std::string host_name, std::string file_path);
+     typedef std::function<bool(const std::string &)> WaitingForConnectCallback_t;
+
+   __attribute__((visibility("default"))) Agent(const std::string &host_name, const std::string &file_path, WaitingForConnectCallback_t callback = nullptr); 
   __attribute__((visibility("default"))) ~Agent();
 
   // Create client_, may create io_ if option enabled
@@ -97,6 +100,7 @@ class Agent {
   // Calls StartIoThread() from off the main thread.
   void RequestIoThreadStart();
 
+  WaitingForConnectCallback_t waitingForConnectCallBack_;
  private:
   std::unique_ptr<CBInspectorClient> client_;
   std::unique_ptr<InspectorIo> io_;

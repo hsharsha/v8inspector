@@ -238,12 +238,16 @@ class CBInspectorClient : public v8_inspector::V8InspectorClient {
   std::unique_ptr<ChannelImpl> channel_;
 };
 
-Agent::Agent(std::string host_name, std::string file_path) : isolate_(nullptr),
+Agent::Agent(const std::string &host_name, const std::string &file_path,
+    WaitingForConnectCallback_t callback) : isolate_(nullptr),
                                  client_(nullptr),
                                  platform_(nullptr),
                                  enabled_(false),
                                  host_name_(host_name),
-                                 file_path_(file_path){}
+                                 file_path_(file_path),
+                                waitingForConnectCallBack_(callback)
+                        {
+                        }
 
 // Destructor needs to be defined here in implementation file as the header
 // does not have full definition of some classes.

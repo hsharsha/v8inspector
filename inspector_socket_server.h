@@ -62,7 +62,7 @@ class InspectorSocketServer {
                         int port,
                         FILE* out = stderr);
   // Start listening on host/port
-  bool Start();
+  bool Start(std::string &debugURL);
 
   // Called by the TransportAction sent with InspectorIo::Write():
   //   kKill and kStop

@@ -332,16 +332,23 @@ void InspectorIo::ThreadMain() {
      fprintf(stderr, "Unable to open file %s\n", file_path_.c_str());
      return;
   }
+
   Transport server(&delegate, &loop, host_name_, port_, jsFile);
 
   TransportAndIo<Transport> queue_transport(&server, this);
   thread_req_.data = &queue_transport;
-  if (!server.Start()) {
+  std::string debugURL;
+  if (!server.Start(debugURL)) {
     state_ = State::kError;  // Safe, main thread is waiting on semaphore
     assert(0 == CloseAsyncAndLoop(&thread_req_));
     uv_sem_post(&thread_start_sem_);
     return;
   }
+  if(agent_->waitingForConnectCallBack_)
+     if(! agent_->waitingForConnectCallBack_(debugURL))
+         return;
+
+
   port_ = server.Port();  // Safe, main thread is waiting on semaphore.
   if (!wait_for_connect_) {
     uv_sem_post(&thread_start_sem_);

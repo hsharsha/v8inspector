@@ -412,7 +412,7 @@ void InspectorSocketServer::SendListResponse(InspectorSocket* socket) {
   SendHttpResponse(socket, MapsToString(response));
 }
 
-bool InspectorSocketServer::Start() {
+bool InspectorSocketServer::Start(std::string &debugURL) {
   assert(state_ == ServerState::kNew);
   struct addrinfo hints;
   memset(&hints, 0, sizeof(hints));
@@ -450,7 +450,7 @@ bool InspectorSocketServer::Start() {
   }
   state_ = ServerState::kRunning;
   // getaddrinfo sorts the addresses, so the first port is most relevant.
-  PrintDebuggerReadyMessage(host_, server_sockets_[0]->port(),
+  debugURL = PrintDebuggerReadyMessage(host_, server_sockets_[0]->port(),
                             delegate_->GetTargetIds(), out_);
   return true;
 }
