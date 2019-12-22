@@ -114,19 +114,25 @@ void OnBufferAlloc(uv_handle_t* handle, size_t len, uv_buf_t* buf) {
   buf->len = len;
 }
 
-std::string PrintDebuggerReadyMessage(const std::string& host,
-                               int port,
-                               const std::vector<std::string>& ids,
-                               FILE* out) {
-//  if (out == NULL) {
-//    return;
-//  }
-  std::string result;
-  for (const std::string& id : ids) {
+std::string MakeFrontEndURL(const std::string& host,
+                            int port,
+                            const std::string& id)
+{
     std::string frontend_url;
     frontend_url = "chrome-devtools://devtools/bundled";
     frontend_url += "/js_app.html?experiments=true&v8only=true&ws=";
     frontend_url += FormatWsAddress(host, port, id, false);
+    return frontend_url;
+}
+
+std::string PrintDebuggerReadyMessage(const std::string& host,
+                               int port,
+                               const std::vector<std::string>& ids,
+                               FILE* out) 
+{
+  std::string result;
+  for (const std::string& id : ids) {
+    std::string frontend_url = MakeFrontEndURL(host, port, id);
     if(out)
         fprintf(out, "%s\n", frontend_url.c_str());
     fprintf(stderr, "Debugger starting on %s\n", frontend_url.c_str());

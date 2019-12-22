@@ -128,10 +128,7 @@ int main(int argc, char* argv[]) {
     Local<Context> context = Context::New(isolate, NULL, global);
     Context::Scope context_scope(context);
 
-    Agent *agent = new Agent("localhost", "D:\\_INOUT\\temp\\frontend.url", [](const std::string &url)
-    {
-        return true;
-    });
+    Agent *agent = new Agent("localhost", "", "id123");
     agent->Start(isolate, platform, ""); // argv[1]);
     agent->PauseOnNextJavascriptStatement("Break on start");
 

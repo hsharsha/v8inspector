@@ -37,6 +37,24 @@
 #include <cassert>
 
 namespace inspector {
+// UUID RFC: https://www.ietf.org/rfc/rfc4122.txt
+// Used ver 4 - with numbers
+std::string GenerateID() {
+  uint8_t buffer[16];
+  RAND_bytes(buffer, sizeof(buffer));
+  char uuid[256];
+  snprintf(uuid, sizeof(uuid), "%04x%04x-%04x-%04x-%04x-%04x%04x%04x",
+           buffer[0],
+           buffer[1],
+           buffer[2],
+           (buffer[3] & 0x0fff) | 0x4000,
+           (buffer[4] & 0x3fff) | 0x8000,
+           buffer[5],
+           buffer[6],
+           buffer[7]);
+  return uuid;
+}
+
 namespace {
 using AsyncAndAgent = std::pair<uv_async_t, Agent*>;
 using namespace v8;
@@ -71,24 +89,6 @@ std::string ScriptPath(uv_loop_t* loop, const std::string& script_name) {
   }
 
   return script_path;
-}
-
-// UUID RFC: https://www.ietf.org/rfc/rfc4122.txt
-// Used ver 4 - with numbers
-std::string GenerateID() {
-  uint8_t buffer[16];
-  RAND_bytes(buffer, sizeof(buffer));
-  char uuid[256];
-  snprintf(uuid, sizeof(uuid), "%04x%04x-%04x-%04x-%04x-%04x%04x%04x",
-           buffer[0],
-           buffer[1],
-           buffer[2],
-           (buffer[3] & 0x0fff) | 0x4000,
-           (buffer[4] & 0x3fff) | 0x8000,
-           buffer[5],
-           buffer[6],
-           buffer[7]);
-  return uuid;
 }
 
 std::string StringViewToUtf8(const StringView& view) {
@@ -162,7 +162,9 @@ class IoSessionDelegate : public InspectorSessionDelegate {
 class InspectorIoDelegate: public inspector::SocketServerDelegate {
  public:
   InspectorIoDelegate(InspectorIo* io, const std::string& script_path,
-                      const std::string& script_name, bool wait);
+                      const std::string& script_name, 
+                      const std::string& target_id, bool wait);
+
   // Calls PostIncomingMessage() with appropriate InspectorAction:
   //   kStartSession
   bool StartSession(int session_id, const std::string& target_id) override;
@@ -212,14 +214,16 @@ class DispatchMessagesTask : public Task {
 InspectorIo::InspectorIo(Isolate* isolate, Platform* platform,
                          const std::string& path, std::string host_name,
                          bool wait_for_connect, std::string file_path,
-                         Agent *agent)
+                         Agent *agent,
+                         const std::string &target_id)
                          : thread_(), delegate_(nullptr),
                            state_(State::kNew), isolate_(isolate),
                            thread_req_(), platform_(platform),
                            dispatching_messages_(false), session_id_(0),
                            script_name_(path),
                            wait_for_connect_(wait_for_connect), host_name_(host_name), port_(0),
-                           file_path_(file_path), agent_(agent){
+                           file_path_(file_path), agent_(agent), target_id_(target_id)
+{
   main_thread_req_ = new AsyncAndAgent({uv_async_t(), agent_});
   assert(0 == uv_async_init(uv_default_loop(), &main_thread_req_->first,
                             InspectorIo::MainThreadReqAsyncCb));
@@ -323,7 +327,7 @@ void InspectorIo::ThreadMain() {
   err = uv_async_init(&loop, &thread_req_, IoThreadAsyncCb<Transport>);
   assert(err == 0);
   std::string script_path = ScriptPath(&loop, script_name_);
-  InspectorIoDelegate delegate(this, script_path, script_name_,
+  InspectorIoDelegate delegate(this, script_path, script_name_, target_id_,
                                wait_for_connect_);
   delegate_ = &delegate;
   FILE *jsFile = fopen(file_path_.c_str(), "w");
@@ -344,11 +348,7 @@ void InspectorIo::ThreadMain() {
     uv_sem_post(&thread_start_sem_);
     return;
   }
-  if(agent_->waitingForConnectCallBack_)
-     if(! agent_->waitingForConnectCallBack_(debugURL))
-         return;
-
-
+  
   port_ = server.Port();  // Safe, main thread is waiting on semaphore.
   if (!wait_for_connect_) {
     uv_sem_post(&thread_start_sem_);
@@ -485,14 +485,17 @@ void InspectorIo::Write(TransportAction action, int session_id,
 InspectorIoDelegate::InspectorIoDelegate(InspectorIo* io,
                                          const std::string& script_path,
                                          const std::string& script_name,
+                                         const std::string& target_id,
                                          bool wait)
                                          : io_(io),
                                            connected_(false),
                                            session_id_(0),
                                            script_name_(script_name),
                                            script_path_(script_path),
-                                           target_id_(GenerateID()),
-                                           waiting_(wait) { }
+                                           target_id_(target_id),
+                                           waiting_(wait) 
+{
+}
 
 
 bool InspectorIoDelegate::StartSession(int session_id,

@@ -39,8 +39,13 @@
 #endif  // __POSIX__
 
 namespace inspector {
+std::string GenerateID();
+std::string MakeFrontEndURL(const std::string& host,
+                            int port,
+                            const std::string& id);
 namespace {
 using namespace v8;
+
 
 static uv_sem_t start_io_thread_semaphore;
 static uv_async_t start_io_thread_async;
@@ -238,14 +243,15 @@ class CBInspectorClient : public v8_inspector::V8InspectorClient {
   std::unique_ptr<ChannelImpl> channel_;
 };
 
-Agent::Agent(const std::string &host_name, const std::string &file_path,
-    WaitingForConnectCallback_t callback) : isolate_(nullptr),
+Agent::Agent(const std::string &host_name, 
+             const std::string &file_path,
+             const std::string &target_id) : isolate_(nullptr),
                                  client_(nullptr),
                                  platform_(nullptr),
                                  enabled_(false),
                                  host_name_(host_name),
                                  file_path_(file_path),
-                                waitingForConnectCallBack_(callback)
+                                 target_id_(target_id.empty() ? GenerateID() : target_id)
                         {
                         }
 
@@ -283,7 +289,7 @@ bool Agent::StartIoThread(bool wait_for_connect) {
 
   enabled_ = true;
   io_ = std::unique_ptr<InspectorIo>(
-      new InspectorIo(isolate_, platform_, path_, host_name_, true, file_path_, this));
+      new InspectorIo(isolate_, platform_, path_, host_name_, true, file_path_, this, target_id_));
   if (!io_->Start()) {
     client_.reset();
     return false;

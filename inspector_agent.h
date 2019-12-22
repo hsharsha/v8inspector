@@ -32,7 +32,9 @@
 #include <stddef.h>
 
 #ifdef WIN32
-#define __attribute__(x) __declspec(dllexport) 
+#define EXPORT_ATTRIBUTE __declspec(dllexport) 
+#else
+#define EXPORT_ATTRIBUTE __attribute__((visibility("default"))) 
 #endif
 
 namespace inspector {
@@ -52,15 +54,14 @@ class CBInspectorClient;
 
 class Agent {
  public:
-     typedef std::function<bool(const std::string &)> WaitingForConnectCallback_t;
 
-   __attribute__((visibility("default"))) Agent(const std::string &host_name, const std::string &file_path, WaitingForConnectCallback_t callback = nullptr); 
-  __attribute__((visibility("default"))) ~Agent();
+  EXPORT_ATTRIBUTE  Agent(const std::string &host_name, const std::string &file_path, const std::string &target_id = std::string()); 
+  EXPORT_ATTRIBUTE  ~Agent();
 
   // Create client_, may create io_ if option enabled
-  __attribute__((visibility("default"))) bool Start(Isolate* isolate, Platform* platform, const char* path);
+  EXPORT_ATTRIBUTE  bool Start(Isolate* isolate, Platform* platform, const char* file_path = nullptr);
   // Stop and destroy io_
-  __attribute__((visibility("default"))) void Stop();
+  EXPORT_ATTRIBUTE  void Stop();
 
   bool IsStarted() { return !!client_; }
 
@@ -69,7 +70,7 @@ class Agent {
 
 
   void WaitForDisconnect();
-   __attribute__((visibility("default"))) void FatalException(Local<Value> error,
+   EXPORT_ATTRIBUTE  void FatalException(Local<Value> error,
                       v8::Local<v8::Message> message);
 
   // These methods are called by the WS protocol and JS binding to create
@@ -82,7 +83,7 @@ class Agent {
 
   void RunMessageLoop();
   bool enabled() { return enabled_; }
-  __attribute__((visibility("default"))) void PauseOnNextJavascriptStatement(const std::string& reason);
+  EXPORT_ATTRIBUTE  void PauseOnNextJavascriptStatement(const std::string& reason);
 
   // Initialize 'inspector' module bindings
   static void InitInspector(Local<Object> target,
@@ -100,7 +101,6 @@ class Agent {
   // Calls StartIoThread() from off the main thread.
   void RequestIoThreadStart();
 
-  WaitingForConnectCallback_t waitingForConnectCallBack_;
  private:
   std::unique_ptr<CBInspectorClient> client_;
   std::unique_ptr<InspectorIo> io_;
@@ -110,6 +110,7 @@ class Agent {
   std::string path_;
   std::string host_name_;
   std::string file_path_;
+  std::string target_id_;
 };
 
 }  // namespace inspector
