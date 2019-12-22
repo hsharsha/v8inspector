@@ -330,11 +330,15 @@ void InspectorIo::ThreadMain() {
   InspectorIoDelegate delegate(this, script_path, script_name_, target_id_,
                                wait_for_connect_);
   delegate_ = &delegate;
-  FILE *jsFile = fopen(file_path_.c_str(), "w");
-  if(! jsFile) 
+  FILE *jsFile = nullptr;
+  if(! file_path_.empty())
   {
-     fprintf(stderr, "Unable to open file %s\n", file_path_.c_str());
-     return;
+      jsFile = fopen(file_path_.c_str(), "w");
+      if(! jsFile) 
+      {
+         fprintf(stderr, "Unable to open file %s\n", file_path_.c_str());
+         return;
+      }
   }
 
   Transport server(&delegate, &loop, host_name_, port_, jsFile);
