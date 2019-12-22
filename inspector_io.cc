@@ -231,6 +231,8 @@ InspectorIo::InspectorIo(Isolate* isolate, Platform* platform,
   assert(0 == uv_sem_init(&thread_start_sem_, 0));
   //uv_cond_init(&incoming_message_cond_);
   //uv_mutex_init(&state_lock_);
+
+  IOStartUp<InspectorSocketServer>();
 }
 
 InspectorIo::~InspectorIo() {
@@ -316,52 +318,75 @@ void InspectorIo::IoThreadAsyncCb(uv_async_t* async) {
     }
   }
 }
+  template <typename Transport> struct server_data_type
+  {
+        InspectorIoDelegate *delegate;
+        Transport *server;
+        TransportAndIo<Transport> *queue_transport;
+        uv_loop_t loop;
+        FILE *jsFile = nullptr;
+  };
 
 template<typename Transport>
-void InspectorIo::ThreadMain() {
-  uv_loop_t loop;
-  loop.data = nullptr;
-  int err = uv_loop_init(&loop);
+void InspectorIo::IOStartUp() {
+
+    server_data_type<Transport> *server_data = new server_data_type<Transport>;
+    server_data_ = server_data;
+
+  server_data->loop.data = nullptr;
+  int err = uv_loop_init(&server_data->loop);
   assert(err == 0);
   thread_req_.data = nullptr;
-  err = uv_async_init(&loop, &thread_req_, IoThreadAsyncCb<Transport>);
+  err = uv_async_init(&server_data->loop, &thread_req_, IoThreadAsyncCb<Transport>);
   assert(err == 0);
-  std::string script_path = ScriptPath(&loop, script_name_);
-  InspectorIoDelegate delegate(this, script_path, script_name_, target_id_,
-                               wait_for_connect_);
-  delegate_ = &delegate;
-  FILE *jsFile = nullptr;
+  std::string script_path = ScriptPath(&server_data->loop, script_name_);
+  server_data->delegate = new InspectorIoDelegate (this, script_path, script_name_, target_id_, wait_for_connect_);
+  delegate_ = server_data->delegate;
+
   if(! file_path_.empty())
   {
-      jsFile = fopen(file_path_.c_str(), "w");
-      if(! jsFile) 
+      server_data->jsFile = fopen(file_path_.c_str(), "w");
+      if(! server_data->jsFile) 
       {
          fprintf(stderr, "Unable to open file %s\n", file_path_.c_str());
          return;
       }
   }
 
-  Transport server(&delegate, &loop, host_name_, port_, jsFile);
+  server_data->server = new Transport(delegate_, &server_data->loop, host_name_, port_, server_data->jsFile);
 
-  TransportAndIo<Transport> queue_transport(&server, this);
-  thread_req_.data = &queue_transport;
+  server_data->queue_transport = new TransportAndIo<Transport>(server_data->server, this);
+  thread_req_.data = server_data->queue_transport;
   std::string debugURL;
-  if (!server.Start(debugURL)) {
+  if (! server_data->server->Start(debugURL)) {
     state_ = State::kError;  // Safe, main thread is waiting on semaphore
     assert(0 == CloseAsyncAndLoop(&thread_req_));
     uv_sem_post(&thread_start_sem_);
     return;
   }
   
-  port_ = server.Port();  // Safe, main thread is waiting on semaphore.
+  port_ = server_data->server->Port();  // Safe, main thread is waiting on semaphore.
   if (!wait_for_connect_) {
     uv_sem_post(&thread_start_sem_);
   }
-  uv_run(&loop, UV_RUN_DEFAULT);
+}
+template<typename Transport>
+void InspectorIo::ThreadMain() {
+//  IOStartUp<Transport>();
+
+  server_data_type<Transport> *server_data = reinterpret_cast<server_data_type<Transport> *> (server_data_);
+  
+  uv_run(&server_data->loop, UV_RUN_DEFAULT);
   thread_req_.data = nullptr;
-  assert(uv_loop_close(&loop) ==  0);
+  assert(uv_loop_close(&server_data->loop) ==  0);
   delegate_ = nullptr;
-  fclose(jsFile);
+  if(server_data->jsFile)
+     fclose(server_data->jsFile);
+
+  delete server_data->queue_transport;
+  delete server_data->server;
+  delete server_data->delegate;
+  delete server_data;
 }
 
 template <typename ActionType>

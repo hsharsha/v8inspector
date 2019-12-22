@@ -258,9 +258,14 @@ Agent::Agent(const std::string &host_name,
 // Destructor needs to be defined here in implementation file as the header
 // does not have full definition of some classes.
 Agent::~Agent() {
+const std::string &Agent::GetFrontendURL()
+{
+    frontend_url_buff_ = MakeFrontEndURL(host_name_, io_->port(), target_id_);
+    return frontend_url_buff_;
 }
 
-bool Agent::Start(Isolate *isolate, Platform* platform, const char* path) {
+
+bool Agent::Prepare(Isolate *isolate, Platform* platform, const char* path) {
   path_ = path == nullptr ? "" : path;
   isolate_ = isolate;
   client_ =
@@ -290,6 +295,10 @@ bool Agent::StartIoThread(bool wait_for_connect) {
   enabled_ = true;
   io_ = std::unique_ptr<InspectorIo>(
       new InspectorIo(isolate_, platform_, path_, host_name_, true, file_path_, this, target_id_));
+  return true;
+}
+bool Agent::Run() {
+
   if (!io_->Start()) {
     client_.reset();
     return false;

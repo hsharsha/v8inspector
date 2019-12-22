@@ -59,7 +59,16 @@ class Agent {
   EXPORT_ATTRIBUTE  ~Agent();
 
   // Create client_, may create io_ if option enabled
-  EXPORT_ATTRIBUTE  bool Start(Isolate* isolate, Platform* platform, const char* file_path = nullptr);
+  EXPORT_ATTRIBUTE  bool Start(Isolate* isolate, Platform* platform, const char* file_path = nullptr)
+  {
+    if(! Prepare(isolate, platform, file_path))
+        return false;
+    return Run();
+  }
+
+  EXPORT_ATTRIBUTE  bool Prepare(Isolate* isolate, Platform* platform, const char* file_path = nullptr);
+  EXPORT_ATTRIBUTE  bool Run();
+  EXPORT_ATTRIBUTE  const std::string &GetFrontendURL();
   // Stop and destroy io_
   EXPORT_ATTRIBUTE  void Stop();
 
@@ -111,6 +120,8 @@ class Agent {
   std::string host_name_;
   std::string file_path_;
   std::string target_id_;
+
+  std::string frontend_url_buff_;
 };
 
 }  // namespace inspector
