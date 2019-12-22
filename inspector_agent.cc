@@ -258,6 +258,14 @@ Agent::Agent(const std::string &host_name,
 // Destructor needs to be defined here in implementation file as the header
 // does not have full definition of some classes.
 Agent::~Agent() {
+    if(io_ &&
+       io_->IsConnected())
+    {
+        Disconnect();
+        Stop();
+    }
+}
+
 const std::string &Agent::GetFrontendURL()
 {
     frontend_url_buff_ = MakeFrontEndURL(host_name_, io_->port(), target_id_);

@@ -129,7 +129,9 @@ int main(int argc, char* argv[]) {
     Context::Scope context_scope(context);
 
     Agent *agent = new Agent("localhost", "", "id123");
-    agent->Start(isolate, platform, ""); // argv[1]);
+    agent->Prepare(isolate, platform, ""); // argv[1]);
+    std::string s = agent->GetFrontendURL();
+    agent->Run(); // argv[1]);
     agent->PauseOnNextJavascriptStatement("Break on start");
 
     Local<String> file_name =
@@ -143,6 +145,8 @@ int main(int argc, char* argv[]) {
       bool success = ExecuteString(isolate, source, file_name, false, true, agent);
       while (platform::PumpMessageLoop(platform, isolate)) {};
       if (!success) return 1;
+
+      delete agent;
   }
 
   // Dispose the isolate and tear down V8.
