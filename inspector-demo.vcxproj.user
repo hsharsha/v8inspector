@@ -3,11 +3,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerEnvironment>path=..\libuv_1_10\x64;..\openssl\x64\bin\;..\icu\bin64\;%path%</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>../sample.js</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>sample.js</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerEnvironment>path=..\libuv_1_10\x64;..\openssl\x64\bin\;..\icu\bin64\;%path%</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>../sample.js</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>sample.js</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>

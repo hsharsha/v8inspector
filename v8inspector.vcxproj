@@ -53,7 +53,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\v8-v141-x64.7.1.302.4\include\include;..\..\v8-v141-x64.7.1.302.4\include;..\icu\include;..\libuv_1_10\x64\include;..\openssl\x64\include;..\zlib\lib\native\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\v8-v141-x64.7.1.302.4\include;..\icu\include;..\libuv_1_10\x64\include;..\openssl\x64\include;..\zlib\lib\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>Default</CompileAs>
@@ -71,10 +71,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\";v8inspector_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\v8-v141-x64.7.1.302.4\include\include;..\..\v8-v141-x64.7.1.302.4\include;..\icu\include;..\libuv_1_10\x64\include;..\openssl\x64\include;..\zlib\lib\native\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\v8-v141-x64.7.1.302.4\include;..\icu\include;..\libuv_1_10\x64\include;..\openssl\x64\include;..\zlib\lib\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\v8-v141-x64.7.1.302.4\include\include;..\..\v8-v141-x64.7.1.302.4\include;..\icu\include;..\libuv_1_10\x64\include;..\openssl\x64\include;..\zlib\lib\native\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\v8-v141-x64.7.1.302.4\include;..\icu\include;..\libuv_1_10\x64\include;..\openssl\x64\include;..\zlib\lib\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -103,7 +103,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\v8-v141-x64.7.1.302.4\include\include;..\..\v8-v141-x64.7.1.302.4\include;..\icu\include;..\libuv_1_10\x64\include;..\openssl\x64\include;..\zlib\lib\native\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\v8-v141-x64.7.1.302.4\include;..\icu\include;..\libuv_1_10\x64\include;..\openssl\x64\include;..\zlib\lib\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -112,17 +112,17 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release";v8inspector_EXPORTS;_ITERATOR_DEBUG_LEVEL=0;__WIN_NT__;__MCRSFTC__;__WINDOWS__;DIME_NOT_DLL;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;_SIZE_T;_STL_DB;_DNK_RENAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;CMAKE_INTDIR="Release";v8inspector_EXPORTS;_ITERATOR_DEBUG_LEVEL=0;__WIN_NT__;__MCRSFTC__;__WINDOWS__;DIME_NOT_DLL;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;_SIZE_T;_STL_DB;_DNK_RENAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <DebugInformationFormat>
-      </DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\";v8inspector_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\v8-v141-x64.7.1.302.4\include\include;..\..\v8-v141-x64.7.1.302.4\include;..\icu\include;..\libuv_1_10\x64\include;..\openssl\x64\include;..\zlib\lib\native\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\v8-v141-x64.7.1.302.4\include;..\icu\include;..\libuv_1_10\x64\include;..\openssl\x64\include;..\zlib\lib\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\v8-v141-x64.7.1.302.4\include\include;..\..\v8-v141-x64.7.1.302.4\include;..\icu\include;..\libuv_1_10\x64\include;..\openssl\x64\include;..\zlib\lib\native\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\v8-v141-x64.7.1.302.4\include;..\icu\include;..\libuv_1_10\x64\include;..\openssl\x64\include;..\zlib\lib\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>

@@ -39,13 +39,13 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">build\Debugx64\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">build\Debugx64Obj\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">build\Debugx64ObjDemo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">inspector-demo</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">build\Releasex64\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">build\Releasex64Obj\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">build\Releasex64ObjDemo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">inspector-demo</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
@@ -53,7 +53,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;..\..\v8-v141-x64.7.1.302.4\include\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsCpp</CompileAs>
@@ -71,10 +71,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;..\..\v8-v141-x64.7.1.302.4\include\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;..\..\v8-v141-x64.7.1.302.4\include\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -97,7 +97,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;..\..\v8-v141-x64.7.1.302.4\include\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -106,17 +106,17 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_ITERATOR_DEBUG_LEVEL=0;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <DebugInformationFormat>
-      </DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <BrowseInformation>false</BrowseInformation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;..\..\v8-v141-x64.7.1.302.4\include\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;..\..\v8-v141-x64.7.1.302.4\include\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -127,7 +127,7 @@
       <AdditionalDependencies>Build\Releasex64\v8inspector.lib;..\..\v8-v141-x64.7.1.302.4\lib\Release\v8.dll.lib;..\..\v8-v141-x64.7.1.302.4\lib\Release\v8_libbase.dll.lib;..\..\v8-v141-x64.7.1.302.4\lib\Release\v8_libplatform.dll.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>build/Releasex64/inspector.lib</ImportLibrary>
       <ProgramDataBaseFile>build/Releasex64/inspector.pdb</ProgramDataBaseFile>
