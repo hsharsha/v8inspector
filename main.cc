@@ -128,7 +128,10 @@ int main(int argc, char* argv[]) {
     Local<Context> context = Context::New(isolate, NULL, global);
     Context::Scope context_scope(context);
 
-    Agent *agent = new Agent("localhost", "", "id123");
+    Agent *agent = new Agent("localhost", 
+                              "",  // Path to a text file where inspector writes the url used (optional)
+                              ""   // predefined ID for session (optional)
+                            );
     agent->Prepare(isolate, platform, ""); // argv[1]);
     std::string s = agent->GetFrontendURL();
     agent->Run(); // argv[1]);
