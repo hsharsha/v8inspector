@@ -26,24 +26,53 @@ $ ./inspector ../sample.js
 ## 3rd Partdy Dependencies / Windows libraries:
 libuv
 download from https://dist.libuv.org/dist/v1.10.0/
-rename to .zip and unpack at v8Inspector\libuv_1_10\x86\
+rename to .zip and unpack at google_v8\v8Inspector\libuv_1_10\x86\
 includes prebuild binaries
 
 icu
 Download from https://github.com/unicode-org/icu/releases/tag/release-59-2
 Install at v8Inspector\icu
-Includes a Visual Studio Solution at v8Inspector\icu\source\allinone\allinone.sln
+Includes a Visual Studio Solution at google_v8\v8Inspector\icu\source\allinone\allinone.sln
 This required installing some updates for VC2017. 
 
 lz4
 Download project from https://github.com/lz4/lz4
 Unpack at v8Inspector\lz4-dev
-Includes a VC2017 solution at v8Inspector\lz4-dev\visual\VS2017\lz4.sln
+Includes a VC2017 solution at google_v8\v8Inspector\lz4-dev\visual\VS2017\lz4.sln
 
 openssl
 Donload binary distribution at https://kb.firedaemon.com/support/solutions/articles/4000121705
-Unpack to v8Inspector\openssl
+Unpack to google_v8\v8Inspector\openssl
 
 zlib
 Download from https://www.nuget.org/packages/zlib128-vc140-static-32_64/
-Rename to zip and Unpack at D:\Develop\google_v8\v8Inspector\zlib\
+Rename to zip and Unpack at google_v8\v8Inspector\zlib\
+
+v8 libraries
+Download prebuild from 
+https://www.nuget.org/packages/v8-v140-x64/7.1.302.4
+https://www.nuget.org/packages/v8.redist-v140-x86/7.1.302.4
+and unpack to google_v8 dir
+
+
+Your directory Structure should now look like this:
+google_v8\v8-v141-x64.7.1.302.4
+google_v8\v8-v141-x86.7.1.302.4
+google_v8\v8Inspector\icu
+google_v8\v8Inspector\libuv_1_10
+google_v8\v8Inspector\lz4-dev
+google_v8\v8Inspector\openssl
+google_v8\v8Inspector\v8inspector
+google_v8\v8Inspector\zlib
+
+
+I had to copy the follwing files from v8-v141-x64.7.1.302.4 to inthe build directory v8Inspector\v8inspector\build\Debug\ order to make things run:
+natives_blob.bin
+snapshot_blob.bin
+icudtl.dat
+icui18n.dll
+icuuc.dll
+v8.dll
+v8_libbase.dll
+v8_libplatform.dll
+
