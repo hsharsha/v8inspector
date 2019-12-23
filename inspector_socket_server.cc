@@ -169,6 +169,7 @@ void SendProtocolJson(InspectorSocket* socket) {
   strm.zalloc = Z_NULL;
   strm.zfree = Z_NULL;
   strm.opaque = Z_NULL;
+
   assert(Z_OK == inflateInit(&strm));
   static const size_t kDecompressedSize =
       PROTOCOL_JSON[0] * 0x10000u +
@@ -364,6 +365,7 @@ void InspectorSocketServer::SessionTerminated(SocketSession* session) {
 
 bool InspectorSocketServer::HandleGetRequest(InspectorSocket* socket,
                                              const std::string& path) {
+  
   const char* command = MatchPathSegment(path.c_str(), "/json");
   if (command == nullptr)
     return false;
@@ -385,6 +387,7 @@ bool InspectorSocketServer::HandleGetRequest(InspectorSocket* socket,
     return false;
   }
   return false;
+
 }
 
 void InspectorSocketServer::SendListResponse(InspectorSocket* socket) {

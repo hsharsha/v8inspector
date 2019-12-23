@@ -9,14 +9,6 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="MinSizeRel|x64">
-      <Configuration>MinSizeRel</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="RelWithDebInfo|x64">
-      <Configuration>RelWithDebInfo</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{03F5EE4C-6184-3F74-99A7-CF7DFB0F1B37}</ProjectGuid>
@@ -37,16 +29,6 @@
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
-  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -62,24 +44,12 @@
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\Develop\google_v8\v8Inspector\v8inspector-master\build\Release\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">inspector.dir\Release\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">inspector</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">build\Releasex64\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">build\Releasex64Obj\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">inspector-demo</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:\Develop\google_v8\v8Inspector\v8inspector-master\build\MinSizeRel\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">inspector.dir\MinSizeRel\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">inspector</TargetName>
-    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
-    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:\Develop\google_v8\v8Inspector\v8inspector-master\build\RelWithDebInfo\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">inspector.dir\RelWithDebInfo\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">inspector</TargetName>
-    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
-    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -101,10 +71,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\Develop\google_v8\v8Inspector\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\include\openssl;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include\include;D:\Develop\google_v8\v8Inspector\v8inspector-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;..\..\v8-v141-x64.7.1.302.4\include\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>D:\Develop\google_v8\v8Inspector\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\include\openssl;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include\include;D:\Develop\google_v8\v8Inspector\v8inspector-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;..\..\v8-v141-x64.7.1.302.4\include\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -127,12 +97,10 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\Develop\google_v8\v8Inspector\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\include\openssl;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include\include;D:\Develop\google_v8\v8Inspector\v8inspector-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;..\..\v8-v141-x64.7.1.302.4\include\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -145,10 +113,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\Develop\google_v8\v8Inspector\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\include\openssl;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include\include;D:\Develop\google_v8\v8Inspector\v8inspector-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;..\..\v8-v141-x64.7.1.302.4\include\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>D:\Develop\google_v8\v8Inspector\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\include\openssl;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include\include;D:\Develop\google_v8\v8Inspector\v8inspector-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;..\..\v8-v141-x64.7.1.302.4\include;..\openssl\openssl-1.1\x64\include\openssl;..\..\v8-v141-x64.7.1.302.4\include\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -156,100 +124,13 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <Link>
-      <AdditionalDependencies>Release\v8inspector.lib;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\lib\Release\v8.dll.lib;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\lib\Release\v8_libbase.dll.lib;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\lib\Release\v8_libplatform.dll.lib;D:\Develop\google_v8\v8Inspector\lz4-dev\visual\VS2017\bin\x64_Debug\liblz4.lib;D:\Develop\google_v8\v8Inspector\libuv_1_10\libuv.lib;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\lib\libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalDependencies>Build\Releasex64\v8inspector.lib;..\..\v8-v141-x64.7.1.302.4\lib\Release\v8.dll.lib;..\..\v8-v141-x64.7.1.302.4\lib\Release\v8_libbase.dll.lib;..\..\v8-v141-x64.7.1.302.4\lib\Release\v8_libplatform.dll.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>D:/Develop/google_v8/v8Inspector/v8inspector-master/build/Release/inspector.lib</ImportLibrary>
-      <ProgramDataBaseFile>D:/Develop/google_v8/v8Inspector/v8inspector-master/build/Release/inspector.pdb</ProgramDataBaseFile>
-      <SubSystem>Console</SubSystem>
-    </Link>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
-    <ClCompile>
-      <AdditionalIncludeDirectories>D:\Develop\google_v8\v8Inspector\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\include\openssl;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include\include;D:\Develop\google_v8\v8Inspector\v8inspector-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <CompileAs>CompileAsCpp</CompileAs>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <Optimization>MinSpace</Optimization>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <UseFullPaths>false</UseFullPaths>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="MinSizeRel";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <DebugInformationFormat>
-      </DebugInformationFormat>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\Develop\google_v8\v8Inspector\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\include\openssl;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include\include;D:\Develop\google_v8\v8Inspector\v8inspector-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
-    <Midl>
-      <AdditionalIncludeDirectories>D:\Develop\google_v8\v8Inspector\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\include\openssl;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include\include;D:\Develop\google_v8\v8Inspector\v8inspector-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
-      <HeaderFileName>%(Filename).h</HeaderFileName>
-      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
-      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
-    </Midl>
-    <Link>
-      <AdditionalDependencies>MinSizeRel\v8inspector.lib;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\lib\Release\v8.dll.lib;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\lib\Release\v8_libbase.dll.lib;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\lib\Release\v8_libplatform.dll.lib;D:\Develop\google_v8\v8Inspector\lz4-dev\visual\VS2017\bin\x64_Debug\liblz4.lib;D:\Develop\google_v8\v8Inspector\libuv_1_10\libuv.lib;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\lib\libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>D:/Develop/google_v8/v8Inspector/v8inspector-master/build/MinSizeRel/inspector.lib</ImportLibrary>
-      <ProgramDataBaseFile>D:/Develop/google_v8/v8Inspector/v8inspector-master/build/MinSizeRel/inspector.pdb</ProgramDataBaseFile>
-      <SubSystem>Console</SubSystem>
-    </Link>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
-    <ClCompile>
-      <AdditionalIncludeDirectories>D:\Develop\google_v8\v8Inspector\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\include\openssl;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include\include;D:\Develop\google_v8\v8Inspector\v8inspector-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <CompileAs>CompileAsCpp</CompileAs>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <Optimization>MaxSpeed</Optimization>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <UseFullPaths>false</UseFullPaths>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\Develop\google_v8\v8Inspector\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\include\openssl;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include\include;D:\Develop\google_v8\v8Inspector\v8inspector-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
-    <Midl>
-      <AdditionalIncludeDirectories>D:\Develop\google_v8\v8Inspector\icu\include\unicode;D:\Develop\google_v8\v8Inspector\libuv_1_10\include;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\include\openssl;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\include\include;D:\Develop\google_v8\v8Inspector\v8inspector-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
-      <HeaderFileName>%(Filename).h</HeaderFileName>
-      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
-      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
-      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
-    </Midl>
-    <Link>
-      <AdditionalDependencies>RelWithDebInfo\v8inspector.lib;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\lib\Release\v8.dll.lib;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\lib\Release\v8_libbase.dll.lib;D:\Develop\google_v8\v8-v141-x64.7.1.302.4\lib\Release\v8_libplatform.dll.lib;D:\Develop\google_v8\v8Inspector\lz4-dev\visual\VS2017\bin\x64_Debug\liblz4.lib;D:\Develop\google_v8\v8Inspector\libuv_1_10\libuv.lib;D:\Develop\google_v8\v8Inspector\openssl\openssl-1.1\x64\lib\libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>D:/Develop/google_v8/v8Inspector/v8inspector-master/build/RelWithDebInfo/inspector.lib</ImportLibrary>
-      <ProgramDataBaseFile>D:/Develop/google_v8/v8Inspector/v8inspector-master/build/RelWithDebInfo/inspector.pdb</ProgramDataBaseFile>
+      <ImportLibrary>build/Releasex64/inspector.lib</ImportLibrary>
+      <ProgramDataBaseFile>build/Releasex64/inspector.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -257,7 +138,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="D:\Develop\google_v8\v8Inspector\v8inspector-master\build\v8inspector.vcxproj">
+    <ProjectReference Include="v8inspector.vcxproj">
       <Project>{5580B149-AC88-3AA7-86F4-BFCA0B1C3C0C}</Project>
       <Name>v8inspector</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
