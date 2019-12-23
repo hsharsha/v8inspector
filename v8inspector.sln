@@ -1,0 +1,43 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "inspector-demo", "inspector-demo.vcxproj", "{03F5EE4C-6184-3F74-99A7-CF7DFB0F1B37}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5580B149-AC88-3AA7-86F4-BFCA0B1C3C0C} = {5580B149-AC88-3AA7-86F4-BFCA0B1C3C0C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "v8inspector", "v8inspector.vcxproj", "{5580B149-AC88-3AA7-86F4-BFCA0B1C3C0C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		MinSizeRel|x64 = MinSizeRel|x64
+		Release|x64 = Release|x64
+		RelWithDebInfo|x64 = RelWithDebInfo|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{03F5EE4C-6184-3F74-99A7-CF7DFB0F1B37}.Debug|x64.ActiveCfg = Debug|x64
+		{03F5EE4C-6184-3F74-99A7-CF7DFB0F1B37}.Debug|x64.Build.0 = Debug|x64
+		{03F5EE4C-6184-3F74-99A7-CF7DFB0F1B37}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
+		{03F5EE4C-6184-3F74-99A7-CF7DFB0F1B37}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
+		{03F5EE4C-6184-3F74-99A7-CF7DFB0F1B37}.Release|x64.ActiveCfg = Release|x64
+		{03F5EE4C-6184-3F74-99A7-CF7DFB0F1B37}.Release|x64.Build.0 = Release|x64
+		{03F5EE4C-6184-3F74-99A7-CF7DFB0F1B37}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
+		{03F5EE4C-6184-3F74-99A7-CF7DFB0F1B37}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
+		{5580B149-AC88-3AA7-86F4-BFCA0B1C3C0C}.Debug|x64.ActiveCfg = Debug|x64
+		{5580B149-AC88-3AA7-86F4-BFCA0B1C3C0C}.Debug|x64.Build.0 = Debug|x64
+		{5580B149-AC88-3AA7-86F4-BFCA0B1C3C0C}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
+		{5580B149-AC88-3AA7-86F4-BFCA0B1C3C0C}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
+		{5580B149-AC88-3AA7-86F4-BFCA0B1C3C0C}.Release|x64.ActiveCfg = Release|x64
+		{5580B149-AC88-3AA7-86F4-BFCA0B1C3C0C}.Release|x64.Build.0 = Release|x64
+		{5580B149-AC88-3AA7-86F4-BFCA0B1C3C0C}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
+		{5580B149-AC88-3AA7-86F4-BFCA0B1C3C0C}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {002A765C-65A2-3FA4-8147-213D2CAA6491}
+	EndGlobalSection
+EndGlobal
