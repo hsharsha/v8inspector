@@ -23,7 +23,11 @@ $ make
 $ ./inspector ../sample.js
 ```
 
-## 3rd Partdy Dependencies / Windows libraries:
+## Windows Build
+Project Files/Solution for VC2017 included using v8 Version 7.1.302.4
+See below for 3rd party libraries. 
+
+## 3rd Party Dependencies / Windows libraries:
 libuv<br>
 download from https://dist.libuv.org/dist/v1.10.0/<br>
 rename to .zip and unpack at google_v8\v8Inspector\libuv_1_10\x86\ <br>
@@ -51,11 +55,13 @@ Rename to zip and Unpack at google_v8\v8Inspector\zlib\<br>
 v8 libraries<br>
 Download prebuild from <br>
 https://www.nuget.org/packages/v8-v140-x64/7.1.302.4<br>
+https://www.nuget.org/packages/v8-v140-x86/7.1.302.4<br>
+https://www.nuget.org/packages/v8.redist-v140-x64/7.1.302.4<br>
 https://www.nuget.org/packages/v8.redist-v140-x86/7.1.302.4<br>
 and unpack to google_v8 dir<br>
 
 
-Your directory Structure should now look like this:
+Your directory structure should now look like this:
 ```shell
 google_v8\v8-v141-x64.7.1.302.4
 google_v8\v8-v141-x86.7.1.302.4
@@ -67,7 +73,7 @@ google_v8\v8Inspector\v8inspector
 google_v8\v8Inspector\zlib
 ```
 
-I had to copy the follwing files from v8-v141-x64.7.1.302.4 to inthe build directory v8Inspector\v8inspector\build\Debug\ order to make things run:
+I had to copy the follwing files v8.redist-v140-x64/7.1.302.4 to inthe build directory v8Inspector\v8inspector\build\Debug\ order to make things run:
 ```shell
 natives_blob.bin
 snapshot_blob.bin
