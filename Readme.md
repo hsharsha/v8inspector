@@ -73,7 +73,7 @@ google_v8\v8Inspector\v8inspector
 google_v8\v8Inspector\zlib
 ```
 
-I had to copy the follwing files v8.redist-v140-x64/7.1.302.4 to inthe build directory v8Inspector\v8inspector\build\Debug\ order to make things run:
+I had to copy the following files v8.redist-v140-x64/7.1.302.4 into the build directory v8Inspector\v8inspector\build\Debugx64\ order to make things run:
 ```shell
 natives_blob.bin
 snapshot_blob.bin
