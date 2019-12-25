@@ -47,8 +47,8 @@ MaybeLocal<String> ReadFile(Isolate* isolate, const char* name) {
 const char* ToCString(const String::Utf8Value& value) {
   return *value ? *value : "<string conversion failed>";
 }
-// Executes a string within the current v8 context.
-bool ExecuteString(Isolate* isolate, Local<String> source,
+// Executes a string containing  JS within the current v8 context.
+bool ExecuteJS(Isolate* isolate, Local<String> source,
                    Local<Value> name, bool print_result,
                    bool report_exceptions, Agent* agent) {
   HandleScope handle_scope(isolate);
@@ -73,6 +73,52 @@ bool ExecuteString(Isolate* isolate, Local<String> source,
         const char* cstr = ToCString(str);
         printf("%s\n", cstr);
       }
+
+      return true;
+    }
+  }
+}
+
+// Executes a function exponent with 2 integer arguments 
+// defined in of a string containing JS within the current v8 context.
+bool ExecuteJSFunction_Exponent(Isolate* isolate, Local<String> source,
+                   Local<Value> name, bool print_result,
+                   bool report_exceptions, Agent* agent) {
+  HandleScope handle_scope(isolate);
+  TryCatch try_catch(isolate);
+  ScriptOrigin origin(name);
+  Local<Context> context(isolate->GetCurrentContext());
+  Local<Script> script;
+  if (!Script::Compile(context, source, &origin).ToLocal(&script)) {
+    return false;
+  } else {
+    Local<Value> result;
+    // 1) Execute the JS in order to create the function
+    if (!script->Run(context).ToLocal(&result)) {
+      assert(try_catch.HasCaught());
+      return false;
+    } else {
+      assert(!try_catch.HasCaught());
+      if (print_result && !result->IsUndefined()) {
+        // If all went well and the result wasn't undefined then print
+        // the returned value.
+        String::Utf8Value str(isolate, result);
+        const char* cstr = ToCString(str);
+        printf("%s\n", cstr);
+      }
+      // 2) Execute Function "exponent" from JS
+     Handle<Value> exponent = context->Global()->Get(
+        String::NewFromUtf8(isolate, "exponent", NewStringType::kNormal)
+        .ToLocalChecked());
+      Handle<Function> expFun = Handle<Function>::Cast(exponent);
+      Handle<Value> arg[2];
+      arg[0] = Integer::New(isolate, 10);
+      arg[1] = Integer::New(isolate, 2);
+      Handle<Value> js_result = expFun->Call(Null(isolate), 2, arg);
+      if (try_catch.HasCaught()) {
+        agent->FatalException(try_catch.Exception(), try_catch.Message());
+      }
+      printf("Call to JS function exponent(10, 2) returned %f\n", js_result->ToNumber(isolate)->Value());
 
       return true;
     }
@@ -146,7 +192,8 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "Error reading '%s'\n", argv[1]);
         return 1;
       }
-      bool success = ExecuteString(isolate, source, file_name, false, true, agent);
+      // bool success = ExecuteJS(isolate, source, file_name, false, true, agent);
+      bool success = ExecuteJSFunction_Exponent(isolate, source, file_name, false, true, agent);
       while (platform::PumpMessageLoop(platform, isolate)) {};
       if (!success) return 1;
 
