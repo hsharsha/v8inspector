@@ -72,7 +72,8 @@ std::string MakeFrontEndURL(const std::string& host,
 namespace {
 
 static const uint8_t PROTOCOL_JSON[] = {
-  #include "v8_inspector_protocol_json.h"  // NOLINT(build/include_order)
+//  #include "v8_inspector_protocol_json.h"  // NOLINT(build/include_order)
+    '0'
 };
 
 void Escape(std::string* string) {
@@ -169,6 +170,10 @@ void SendProtocolJson(InspectorSocket* socket) {
   strm.zalloc = Z_NULL;
   strm.zfree = Z_NULL;
   strm.opaque = Z_NULL;
+
+  // BUGBUG ToFix
+  printf("PROTOCOL_JSON not included!");
+  return;
 
   assert(Z_OK == inflateInit(&strm));
   static const size_t kDecompressedSize =
