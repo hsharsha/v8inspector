@@ -96,7 +96,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;CMAKE_INTDIR="Debug";v8inspector_EXPORTS;_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;_ITERATOR_DEBUG_LEVEL=0;_DEBUG;DEBUG;REL_VERS;STORE=extern;__WIN_NT__;__MCRSFTC__;__WINDOWS__;DIME_NOT_DLL;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;_SIZE_T;_STL_DB;_DNK_RENAME;__WIN32__;__MSC32__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;CMAKE_INTDIR="Debug";v8inspector_EXPORTS;_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;_DEBUG;DEBUG;REL_VERS;STORE=extern;__WIN_NT__;__MCRSFTC__;__WINDOWS__;DIME_NOT_DLL;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;_SIZE_T;_STL_DB;_DNK_RENAME;__WIN32__;__MSC32__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
     </ClCompile>
     <ResourceCompile>
@@ -146,7 +146,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;CMAKE_INTDIR="Debug";v8inspector_EXPORTS;_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;_ITERATOR_DEBUG_LEVEL=0;_DEBUG;DEBUG;REL_VERS;STORE=extern;__WIN_NT__;__MCRSFTC__;__WINDOWS__;DIME_NOT_DLL;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;_SIZE_T;_STL_DB;_DNK_RENAME;__WIN32__;__MSC32__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;CMAKE_INTDIR="Debug";v8inspector_EXPORTS;_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;_DEBUG;DEBUG;REL_VERS;STORE=extern;__WIN_NT__;__MCRSFTC__;__WINDOWS__;DIME_NOT_DLL;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;_SIZE_T;_STL_DB;_DNK_RENAME;__WIN32__;__MSC32__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
     </ClCompile>
     <ResourceCompile>
@@ -192,7 +192,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;CMAKE_INTDIR="Release";v8inspector_EXPORTS;_ITERATOR_DEBUG_LEVEL=0;__WIN_NT__;__MCRSFTC__;__WINDOWS__;DIME_NOT_DLL;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;_SIZE_T;_STL_DB;_DNK_RENAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;CMAKE_INTDIR="Release";v8inspector_EXPORTS;__WIN_NT__;__MCRSFTC__;__WINDOWS__;DIME_NOT_DLL;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;_SIZE_T;_STL_DB;_DNK_RENAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
@@ -242,7 +242,7 @@ kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.li
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;CMAKE_INTDIR="Release";v8inspector_EXPORTS;_ITERATOR_DEBUG_LEVEL=0;__WIN_NT__;__MCRSFTC__;__WINDOWS__;DIME_NOT_DLL;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;_SIZE_T;_STL_DB;_DNK_RENAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;CMAKE_INTDIR="Release";v8inspector_EXPORTS;__WIN_NT__;__MCRSFTC__;__WINDOWS__;DIME_NOT_DLL;_CRT_SECURE_NO_DEPRECATE;NOMINMAX;_SIZE_T;_STL_DB;_DNK_RENAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
