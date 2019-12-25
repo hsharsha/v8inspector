@@ -78,10 +78,3 @@ v8.dll
 v8_libbase.dll
 v8_libplatform.dll
 ```
-
-This project has set the preprocessor definition:
-```shell
-_ITERATOR_DEBUG_LEVEL=0
-```
-in all configurations as i need this for my projet.
-Your progra will probably fail if you use the DLL and this setting is not the same for all modules. So you should either set that too, or remove it from the project
