@@ -45,7 +45,7 @@ Unpack at v8Inspector\lz4-dev<br>
 Includes a VC2017 solution at google_v8\v8Inspector\lz4-dev\visual\VS2017\lz4.sln<br>
 
 openssl<br>
-Donload binary distribution at https://kb.firedaemon.com/support/solutions/articles/4000121705<br>
+Donwload binary distribution at https://kb.firedaemon.com/support/solutions/articles/4000121705<br>
 Unpack to google_v8\v8Inspector\openssl<br>
 
 zlib<br>
@@ -73,7 +73,7 @@ google_v8\v8Inspector\v8inspector
 google_v8\v8Inspector\zlib
 ```
 
-I had to copy the following files v8.redist-v140-x64/7.1.302.4 into the build directory v8Inspector\v8inspector\build\Debugx64\ order to make things run:
+I had to copy the following files from v8.redist-v140-x64/7.1.302.4 into the build directory v8Inspector\v8inspector\build\Debugx64\ order to make things run:
 ```shell
 natives_blob.bin
 snapshot_blob.bin
