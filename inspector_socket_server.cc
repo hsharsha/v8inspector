@@ -136,7 +136,7 @@ std::string PrintDebuggerReadyMessage(const std::string& host,
     std::string frontend_url = MakeFrontEndURL(host, port, id);
     if(out)
         fprintf(out, "%s\n", frontend_url.c_str());
-    fprintf(stderr, "Debugger starting on %s\n", frontend_url.c_str());
+    fprintf(stderr, "Debugger connection SUCCESS; Copy URL and open in Chrom browser:\n%s\n", frontend_url.c_str());
 
     result += frontend_url + "\n";
   }

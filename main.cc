@@ -84,6 +84,7 @@ bool ExecuteString(Isolate* isolate, Local<String> source,
 // spaces and ending with a newline.
 void Print(const FunctionCallbackInfo<Value>& args) {
   bool first = true;
+  printf("JS print: ");
   for (int i = 0; i < args.Length(); i++) {
     HandleScope handle_scope(args.GetIsolate());
     if (first) {
