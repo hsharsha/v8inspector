@@ -320,11 +320,22 @@ void InspectorIo::IoThreadAsyncCb(uv_async_t* async) {
 }
   template <typename Transport> struct server_data_type
   {
-        InspectorIoDelegate *delegate;
-        Transport *server;
-        TransportAndIo<Transport> *queue_transport;
+        InspectorIoDelegate         *delegate = nullptr;
+        Transport                   *server = nullptr;
+        TransportAndIo<Transport>   *queue_transport = nullptr;
+        FILE                        *jsFile = nullptr;
         uv_loop_t loop;
-        FILE *jsFile = nullptr;
+
+        int magic = 76543210;
+
+        ~server_data_type()
+        {
+            delegate = nullptr;
+            server = nullptr;
+            queue_transport = nullptr;
+            jsFile = nullptr;
+            magic = 0xBADC0DE;
+        }
   };
 
 template<typename Transport>
