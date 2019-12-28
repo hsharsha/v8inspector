@@ -1,27 +1,32 @@
 ## Introduction
 
-This is a standalone integration of v8-inspector with chrome-devtools front end, to debug any standalone java script code.
+This is integration of v8-inspector with chrome-devtools front end, based on the work of hsharsha in his parent project at https://github.com/hsharsha/v8inspector
 
-This code is inspired (read as copied and ripped apart) from node.js and v8 code base.
-
-This was mainly done to enable debugging of [couchbase eventing functions](https://github.com/couchbase/eventing/tree/master/third_party/inspector)
+I added support for Windows x64/x86 and made some improvements etc.
+Although this project originates from linux/max i only made and tested windows builds.
+cmake files originated from other platforms still included and still should be valid (no source files added).
 
 ## Library Dependencies
 This project depends on following libraries
-* V8 5.9
+* V8 7.1 (was 5.9)
 * ICU 59
 * libuv 1.8
 * libz
 * libcrypto
 
 ## Build Instructions
-```shell
-$ mkdir build && cd build
-$ cmake ..
-$ make
-# To run the binary
-$ ./inspector ../sample.js
-```
+A successful build it should only be neccessary to start "insector-demo" (main.cc) in Visual Studio.
+Then open the URL printed to the console in chrome.
+
+## Known problems and limitations
+* chrome sometimes seems to send in one debug session messages to a inspector object of a already deleted previos session. This seems to be handled now robust in the implementation by checking for a magic number.
+
+* The original project referenced a include file v8_inspector_protocol_json.h 
+The only location where this is used (SendProtocolJson) seems never to be called. I commented this out and added a warning in case its called.
+    
+* The program crashed if the global scope is opened in the debugger. I tracked this down to a call containing the flag "ownProperties":true and worked around this by not dispatching such calls.
+I dont know if this is caused by the update to 7.1. 
+
 
 ## Windows Build
 Project Files/Solution for VC2017 included using v8 Version 7.1.302.4
