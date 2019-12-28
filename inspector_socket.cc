@@ -40,6 +40,7 @@
 namespace inspector {
 
 static const char CLOSE_FRAME[] = {'\x88', '\x00'};
+extern FILE *gLogStream;
 
 enum ws_decode_result {
   FRAME_OK, FRAME_INCOMPLETE, FRAME_CLOSE, FRAME_ERROR
@@ -544,6 +545,12 @@ static void data_received_cb(uv_stream_s* tcp, ssize_t nread,
   }
 #endif
   InspectorSocket* inspector = inspector_from_stream(tcp);
+  if(! inspector->IsValid())
+  {
+     fprintf(gLogStream, "v8inspector: #### Invalid inspector found in %s %d\n", __FILE__, __LINE__);
+     return;
+  }
+
   reclaim_uv_buf(inspector, buf, nread);
   if (nread < 0 || nread == UV_EOF) {
     close_and_report_handshake_failure(inspector);

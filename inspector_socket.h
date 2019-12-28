@@ -130,6 +130,12 @@ class InspectorSocket {
   InspectorSocket() : data(nullptr), http_parsing_state(nullptr),
                       ws_state(nullptr), buffer(0), ws_mode(false),
                       shutting_down(false), connection_eof(false) { }
+  ~InspectorSocket()
+  {
+      magic_ = BAD_MAGIC;
+  }
+  bool IsValid()   { return magic_ == VALID_MAGIC;}
+
   void reinit();
   void* data;
   struct http_parsing_state_s* http_parsing_state;
@@ -139,6 +145,10 @@ class InspectorSocket {
   bool ws_mode;
   bool shutting_down;
   bool connection_eof;
+
+  static const int VALID_MAGIC = 0xF0F0F0F0;
+  static const int   BAD_MAGIC = 0xDE11C0DE;
+  int magic_ = VALID_MAGIC;
 };
 
 int inspector_accept(uv_stream_t* server, InspectorSocket* inspector,

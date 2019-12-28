@@ -37,6 +37,8 @@
 #include <cassert>
 
 namespace inspector {
+extern FILE *gLogStream;
+
 // UUID RFC: https://www.ietf.org/rfc/rfc4122.txt
 // Used ver 4 - with numbers
 std::string GenerateID() {
@@ -202,6 +204,11 @@ class DispatchMessagesTask : public Task {
   explicit DispatchMessagesTask(Agent* agent) : agent_(agent) {}
 
   void Run() override {
+    if(! agent_->IsValid())
+    {
+        fprintf(gLogStream, "v8inspector: #### Invalid agent found in %s %d\n", __FILE__, __LINE__);
+        return;
+    }
     InspectorIo* io = agent_->io();
     if (io != nullptr)
       io->DispatchMessages();
@@ -425,6 +432,11 @@ void InspectorIo::SwapBehindLock(MessageQueue<ActionType>* vector1,
 
 void InspectorIo::PostIncomingMessage(InspectorAction action, int session_id,
                                       const std::string& message) {
+    if(! agent_->IsValid())
+    {
+        fprintf(gLogStream, "v8inspector: #### Invalid agent found in %s %d\n", __FILE__, __LINE__);
+        return;
+    }
 
     //fprintf(gLogStream, "v8inspector: %s %d appending action %d session %d and  message %s\n", __FILE__, __LINE__, action, session_id, message.c_str());
   if (AppendMessage(&incoming_message_queue_, action, session_id,

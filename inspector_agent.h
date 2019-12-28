@@ -37,7 +37,10 @@
 #define EXPORT_ATTRIBUTE __attribute__((visibility("default"))) 
 #endif
 
+
 namespace inspector {
+
+
 
 using namespace v8;
 
@@ -74,6 +77,7 @@ class Agent {
   EXPORT_ATTRIBUTE  void Stop();
 
   bool IsStarted() { return !!client_; }
+  bool IsValid();
 
   // IO thread started, and client connected
   bool IsConnected();
@@ -123,6 +127,9 @@ class Agent {
   std::string target_id_;
 
   std::string frontend_url_buff_;
+  static const int VALID_MAGIC = 0xF0F0F0F0;
+  static const int   BAD_MAGIC = 0xDE11C0DE;
+  int magic_ = VALID_MAGIC;
 };
 
 }  // namespace inspector

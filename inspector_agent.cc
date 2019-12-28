@@ -25,6 +25,7 @@
 #include "inspector_io.h"
 #include "v8-inspector.h"
 #include "v8-platform.h"
+#include "inspector_agent_version.h"
 #include "zlib.h"
 
 #include "libplatform/libplatform.h"
@@ -256,6 +257,8 @@ Agent::Agent(const std::string &host_name,
                                  file_path_(file_path),
                                  target_id_(target_id.empty() ? GenerateID() : target_id)
                         {
+      fprintf(gLogStream, "v8inspector: version %s Agent::Agent at 0X%p\n", V8_VERSION, this);
+
                         }
 
 // Destructor needs to be defined here in implementation file as the header
@@ -267,9 +270,19 @@ Agent::~Agent() {
         Disconnect();
         Stop();
     }
+    magic_ = BAD_MAGIC; 
+    fprintf(gLogStream, "v8inspector: Agent deleted at 0X%p\n", this);
 }
 
 void Agent::SetLogFileStream(FILE *file) {gLogStream = file;}
+
+bool Agent::IsValid() {
+    if(magic_ != VALID_MAGIC)
+        fprintf(gLogStream, "v8inspector: Invalid agent at 0X%p - magic = %08X\n", this, magic_);
+    return magic_ == VALID_MAGIC;
+}
+
+
 const std::string &Agent::GetFrontendURL()
 {
     frontend_url_buff_ = MakeFrontEndURL(host_name_, io_->port(), target_id_);
