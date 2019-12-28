@@ -149,76 +149,88 @@ void Print(const FunctionCallbackInfo<Value>& args) {
 
 int main(int argc, char* argv[]) {
 
-    if(argc < 2 || _access(argv[1], 0) != 0)
+    if (argc < 2 || _access(argv[1], 0) != 0)
     {
         fprintf(stderr, "FATAL ERROR:\nFirst argument must contain a path to a existing JS file.\nPassed: %s\n", argv[1] ? argv[1] : "");
         return -1;
     }
 
-  // Initialize V8.
-  V8::InitializeICUDefaultLocation(argv[0]);
-  V8::InitializeExternalStartupData(argv[0]);
-  Platform* platform = platform::CreateDefaultPlatform();
-  V8::InitializePlatform(platform);
-  V8::Initialize();
-
-  // Create a new Isolate and make it the current one.
-  Isolate::CreateParams create_params;
-  create_params.array_buffer_allocator =
-      ArrayBuffer::Allocator::NewDefaultAllocator();
-  Isolate* isolate = Isolate::New(create_params);
-  {
-      Isolate::Scope isolate_scope(isolate);
-
-      // Create a stack-allocated handle scope.
-      HandleScope handle_scope(isolate);
-
-      // Enter the context for compiling and running the hello world script.
-      Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
-      global->Set(
-          String::NewFromUtf8(isolate, "print", NewStringType::kNormal)
-          .ToLocalChecked(),
-          FunctionTemplate::New(isolate, Print));
-      Local<Context> context = Context::New(isolate, NULL, global);
-      Context::Scope context_scope(context);
-
-      Agent *agent = new Agent("localhost",
-          "",  // Path to a text file where inspector writes the url used (optional)
-          ""   // predefined ID for session (optional)
-      );
-      // Prepare and Run in separate steps in order to retrieve the URL in main thread before calling Run
-      // This is equal to just call agent->Start instead of Prepare/Run
-      agent->Prepare(isolate, platform, ""); // argv[1]);
-      std::string s = agent->GetFrontendURL();
-      agent->Run(); 
-      agent->PauseOnNextJavascriptStatement("Break on start");
-
-      Local<String> file_name =
-          String::NewFromUtf8(isolate, argv[1], NewStringType::kNormal)
-          .ToLocalChecked();
-      Local<String> source;
-      // read the JS file to source buffer
-      if (!ReadFile(isolate, argv[1]).ToLocal(&source)) {
-          fprintf(stderr, "Error reading '%s'\n", argv[1]);
-          return 1;
-      }
-      // Execute the whole sript
-      bool success = ExecuteJS(isolate, source, file_name, false, true, agent);
-      // Alternatively call a single funtion of the script
-      // bool success = ExecuteJSFunction_Exponent(isolate, source, file_name, false, true, agent);
+    // Initialize V8.
+    V8::InitializeICUDefaultLocation(argv[0]);
+    V8::InitializeExternalStartupData(argv[0]);
+    Platform* platform = platform::CreateDefaultPlatform();
+    V8::InitializePlatform(platform);
+    V8::Initialize();
 
 
-      while (platform::PumpMessageLoop(platform, isolate)) {};
-      if (!success) return 1;
 
-      delete agent;
-  }
+    for (int ndx = 0;; ndx++)
+    {
+        fprintf(stderr, "\n\n===================================================\nLoop Index %d\n", ndx);
 
-  // Dispose the isolate and tear down V8.
-  isolate->Dispose();
-  V8::Dispose();
-  V8::ShutdownPlatform();
-  delete platform;
-  delete create_params.array_buffer_allocator;
-  return 0;
+        // Create a new Isolate and make it the current one.
+        Isolate::CreateParams create_params;
+        create_params.array_buffer_allocator =
+            ArrayBuffer::Allocator::NewDefaultAllocator();
+        Isolate* isolate = Isolate::New(create_params);
+        {
+            Isolate::Scope isolate_scope(isolate);
+
+            // Create a stack-allocated handle scope.
+            HandleScope handle_scope(isolate);
+
+            // Enter the context for compiling and running the hello world script.
+            Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
+            global->Set(
+                String::NewFromUtf8(isolate, "print", NewStringType::kNormal)
+                .ToLocalChecked(),
+                FunctionTemplate::New(isolate, Print));
+            Local<Context> context = Context::New(isolate, NULL, global);
+            Context::Scope context_scope(context);
+
+            Agent *agent = new Agent("localhost",
+                "",  // Path to a text file where inspector writes the url used (optional)
+                ""   // predefined ID for session (optional)
+            );
+            // Prepare and Run in separate steps in order to retrieve the URL in main thread before calling Run
+            // This is equal to just call agent->Start instead of Prepare/Run
+            agent->Prepare(isolate, platform, ""); // argv[1]);
+            std::string s = agent->GetFrontendURL();
+            agent->Run();
+            agent->PauseOnNextJavascriptStatement("Break on start");
+
+            Local<String> file_name =
+                String::NewFromUtf8(isolate, argv[1], NewStringType::kNormal)
+                .ToLocalChecked();
+            Local<String> source;
+            // read the JS file to source buffer
+            if (!ReadFile(isolate, argv[1]).ToLocal(&source)) {
+                fprintf(stderr, "Error reading '%s'\n", argv[1]);
+                return 1;
+            }
+            // Execute the whole sript
+            bool success = ExecuteJS(isolate, source, file_name, false, true, agent);
+            // Alternatively call a single funtion of the script
+            // bool success = ExecuteJSFunction_Exponent(isolate, source, file_name, false, true, agent);
+
+
+            while (platform::PumpMessageLoop(platform, isolate)) {};
+            if (!success) return 1;
+
+            delete agent;
+        }
+        // Dispose the isolate and tear down V8.
+        isolate->Dispose();
+        delete create_params.array_buffer_allocator;
+
+        if(argc < 3)
+            break;
+    }
+
+
+
+    V8::Dispose();
+    V8::ShutdownPlatform();
+    delete platform;
+    return 0;
 }
