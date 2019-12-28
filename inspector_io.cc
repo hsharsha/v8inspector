@@ -279,8 +279,8 @@ void InspectorIo::WaitForDisconnect() {
   if (state_ == State::kConnected) {
     state_ = State::kShutDown;
     Write(TransportAction::kStop, 0, StringView());
-    fprintf(stderr, "Waiting for the debugger to disconnect...\n");
-    fflush(stderr);
+    fprintf(gLogStream, "v8inspector: Waiting for the debugger to disconnect...\n");
+    fflush(gLogStream);
     agent_->RunMessageLoop();
   }
 }
@@ -312,7 +312,7 @@ void InspectorIo::IoThreadAsyncCb(uv_async_t* async) {
       break;
     case TransportAction::kSendMessage:
       std::string message = StringViewToUtf8(std::get<2>(outgoing)->string());
-      //fprintf(stderr, "%d %s sending message %s \n", __LINE__, __FILE__, message.c_str());
+      //fprintf(gLogStream, "v8inspector: %d %s sending message %s \n", __LINE__, __FILE__, message.c_str());
       transport->Send(std::get<1>(outgoing), message);
       break;
     }
@@ -348,7 +348,7 @@ void InspectorIo::IOStartUp() {
       server_data->jsFile = fopen(file_path_.c_str(), "w");
       if(! server_data->jsFile) 
       {
-         fprintf(stderr, "Unable to open file %s\n", file_path_.c_str());
+         fprintf(gLogStream, "v8inspector: Unable to open file %s\n", file_path_.c_str());
          return;
       }
   }
@@ -414,7 +414,8 @@ void InspectorIo::SwapBehindLock(MessageQueue<ActionType>* vector1,
 
 void InspectorIo::PostIncomingMessage(InspectorAction action, int session_id,
                                       const std::string& message) {
-    //fprintf(stderr, "%s %d appending action %d session %d and  message %s\n", __FILE__, __LINE__, action, session_id, message.c_str());
+
+    //fprintf(gLogStream, "v8inspector: %s %d appending action %d session %d and  message %s\n", __FILE__, __LINE__, action, session_id, message.c_str());
   if (AppendMessage(&incoming_message_queue_, action, session_id,
                     Utf8ToStringView(message))) {
     Agent* agent = main_thread_req_->second;
@@ -467,7 +468,7 @@ void InspectorIo::DispatchMessages() {
         assert(session_delegate_ == nullptr);
         session_id_ = std::get<1>(task);
         state_ = State::kConnected;
-        fprintf(stderr, "Debugger attached.\n");
+        fprintf(gLogStream, "v8inspector: Debugger attached.\n");
         session_delegate_ = std::unique_ptr<InspectorSessionDelegate>(
             new IoSessionDelegate(this));
         agent_->Connect(session_delegate_.get());
@@ -480,7 +481,7 @@ void InspectorIo::DispatchMessages() {
           state_ = State::kAccepting;
         }
         agent_->Disconnect();
-        fprintf(stderr, "Debugger disconnected.\n");
+        fprintf(gLogStream, "v8inspector: Debugger disconnected.\n");
         session_delegate_.reset();
         break;
       case InspectorAction::kSendMessage:
@@ -491,10 +492,10 @@ void InspectorIo::DispatchMessages() {
           // Using v8 7.1.302.4 this call will crash v8inspector in v8.dll
           if(s.find(L"\"ownProperties\":true") != std::string::npos)
           {
-              fprintf(stderr, "SKIPPING message: %S\n", s.c_str());
+              fprintf(gLogStream, "v8inspector: SKIPPING message: %S\n", s.c_str());
               continue;
           }
-          fprintf(stderr, "Dispatching message: %S\n", s.c_str());
+          fprintf(gLogStream, "v8inspector: Dispatching message: %S\n", s.c_str());
           agent_->Dispatch(message);
           break;
       }

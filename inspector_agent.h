@@ -55,6 +55,7 @@ class CBInspectorClient;
 class Agent {
  public:
 
+  EXPORT_ATTRIBUTE  static void SetLogFileStream(FILE *file);
   EXPORT_ATTRIBUTE  Agent(const std::string &host_name, const std::string &file_path, const std::string &target_id = std::string()); 
   EXPORT_ATTRIBUTE  ~Agent();
 

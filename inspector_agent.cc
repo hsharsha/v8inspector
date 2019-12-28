@@ -38,7 +38,10 @@
 #include <unistd.h>  // setuid, getuid
 #endif  // __POSIX__
 
+
 namespace inspector {
+FILE *gLogStream = stderr;
+
 std::string GenerateID();
 std::string MakeFrontEndURL(const std::string& host,
                             int port,
@@ -266,6 +269,7 @@ Agent::~Agent() {
     }
 }
 
+void Agent::SetLogFileStream(FILE *file) {gLogStream = file;}
 const std::string &Agent::GetFrontendURL()
 {
     frontend_url_buff_ = MakeFrontEndURL(host_name_, io_->port(), target_id_);

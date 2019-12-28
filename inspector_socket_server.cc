@@ -36,6 +36,8 @@
 
 namespace inspector {
 
+extern FILE *gLogStream;
+
 // Function is declared in inspector_io.h so the rest of the node does not
 // depend on inspector_socket_server.h
 std::string FormatWsAddress(const std::string& host, int port,
@@ -136,7 +138,7 @@ std::string PrintDebuggerReadyMessage(const std::string& host,
     std::string frontend_url = MakeFrontEndURL(host, port, id);
     if(out)
         fprintf(out, "%s\n", frontend_url.c_str());
-    fprintf(stderr, "Debugger connection SUCCESS; Copy URL and open in Chrom browser:\n%s\n", frontend_url.c_str());
+    fprintf(gLogStream, "v8inspector: Debugger connection SUCCESS; Copy URL and open in Chrom browser:\n%s\n", frontend_url.c_str());
 
     result += frontend_url + "\n";
   }
@@ -445,7 +447,7 @@ bool InspectorSocketServer::Start(std::string &debugURL) {
                            port_string.c_str(), &hints);
   if (err < 0) {
     if (out_ != NULL) {
-      fprintf(out_, "Unable to resolve \"%s\": %s\n", host_.c_str(),
+      fprintf(out_, "v8inspector: Unable to resolve \"%s\": %s\n", host_.c_str(),
               uv_strerror(err));
     }
     return false;
@@ -463,7 +465,7 @@ bool InspectorSocketServer::Start(std::string &debugURL) {
   // show one error, for the last address.
   if (server_sockets_.empty()) {
     if (out_ != NULL) {
-      fprintf(out_, "Starting inspector on %s:%d failed: %s\n",
+      fprintf(out_, "v8inspector: Starting inspector on %s:%d failed: %s\n",
               host_.c_str(), port_, uv_strerror(err));
       fflush(out_);
     }
