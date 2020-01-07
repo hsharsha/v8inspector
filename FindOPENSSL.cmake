@@ -13,13 +13,16 @@
 #  OPENSSL_LIBRARIES, Library path and libs
 #  OPENSSL_INCLUDE_DIR, where to find the ICU headers
 
-FIND_PATH(OPENSSL_INCLUDE_DIR openssl/ssl.h
-          PATH_SUFFIXES include)
+SET(OPENSSL_INCLUDE_DIR "D:/Develop/google_v8/v8Inspector/openssl/openssl-1.1/x64/include/openssl/")
+SET(OPENSSL_LIBRARIES   "D:/Develop/google_v8/v8Inspector/openssl/openssl-1.1/x64/lib/libcrypto.lib")
 
-FIND_LIBRARY(OPENSSL_LIBRARIES
-             NAMES crypto
-             PATH_SUFFIXES lib)
-
+## FIND_PATH(OPENSSL_INCLUDE_DIR openssl/ssl.h
+##           PATH_SUFFIXES include)
+## 
+## FIND_LIBRARY(OPENSSL_LIBRARIES
+##              NAMES crypto
+##              PATH_SUFFIXES lib)
+## 
 IF (OPENSSL_LIBRARIES AND OPENSSL_INCLUDE_DIR)
     MESSAGE(STATUS "Found OpenSSL headers in ${OPENSSL_INCLUDE_DIR}")
     MESSAGE(STATUS "Using OpenSSL libraries: ${OPENSSL_LIBRARIES}")

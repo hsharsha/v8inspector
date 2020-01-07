@@ -25,6 +25,7 @@
 #include "inspector_io.h"
 #include "v8-inspector.h"
 #include "v8-platform.h"
+#include "inspector_agent_version.h"
 #include "zlib.h"
 
 #include "libplatform/libplatform.h"
@@ -38,9 +39,17 @@
 #include <unistd.h>  // setuid, getuid
 #endif  // __POSIX__
 
+
 namespace inspector {
+FILE *gLogStream = stderr;
+
+std::string GenerateID();
+std::string MakeFrontEndURL(const std::string& host,
+                            int port,
+                            const std::string& id);
 namespace {
 using namespace v8;
+
 
 static uv_sem_t start_io_thread_semaphore;
 static uv_async_t start_io_thread_async;
@@ -58,7 +67,7 @@ class StartIoTask : public Task {
 };
 
 
-std::unique_ptr<v8_inspector::StringBuffer> ToProtocolString(Local<Value> value) {
+std::unique_ptr<v8_inspector::StringBuffer> ToProtocolString(Isolate* isolate, Local<Value> value) {
   if (value.IsEmpty() || value->IsNull() || value->IsUndefined() ||
       !value->IsString()) {
     return v8_inspector::StringBuffer::create(v8_inspector::StringView());
@@ -66,7 +75,7 @@ std::unique_ptr<v8_inspector::StringBuffer> ToProtocolString(Local<Value> value)
   Local<String> string_value = Local<String>::Cast(value);
   size_t len = string_value->Length();
   std::basic_string<uint16_t> buffer(len, '\0');
-  string_value->Write(&buffer[0], 0, len);
+     string_value->Write(isolate, &buffer[0], 0, len);
   return v8_inspector::StringBuffer::create(v8_inspector::StringView(buffer.data(), len));
 }
 
@@ -206,7 +215,7 @@ class CBInspectorClient : public v8_inspector::V8InspectorClient {
 
     if (!stack_trace.IsEmpty() &&
         stack_trace->GetFrameCount() > 0 &&
-        script_id == stack_trace->GetFrame(0)->GetScriptId()) {
+        script_id == stack_trace->GetFrame(isolate_, 0)->GetScriptId()) {
       script_id = 0;
     }
 
@@ -217,8 +226,8 @@ class CBInspectorClient : public v8_inspector::V8InspectorClient {
         context,
         v8_inspector::StringView(DETAILS, sizeof(DETAILS) - 1),
         error,
-        ToProtocolString(message->Get())->string(),
-        ToProtocolString(message->GetScriptResourceName())->string(),
+        ToProtocolString(isolate_, message->Get())->string(),
+        ToProtocolString(isolate_, message->GetScriptResourceName())->string(),
         message->GetLineNumber(context).FromMaybe(0),
         message->GetStartColumn(context).FromMaybe(0),
         client_->createStackTrace(stack_trace),
@@ -238,19 +247,50 @@ class CBInspectorClient : public v8_inspector::V8InspectorClient {
   std::unique_ptr<ChannelImpl> channel_;
 };
 
-Agent::Agent(std::string host_name, std::string file_path) : isolate_(nullptr),
+Agent::Agent(const std::string &host_name, 
+             const std::string &file_path,
+             const std::string &target_id) : isolate_(nullptr),
                                  client_(nullptr),
                                  platform_(nullptr),
                                  enabled_(false),
                                  host_name_(host_name),
-                                 file_path_(file_path){}
+                                 file_path_(file_path),
+                                 target_id_(target_id.empty() ? GenerateID() : target_id)
+                        {
+      fprintf(gLogStream, "v8inspector: version %s Agent::Agent at 0X%p\n", V8_VERSION, this);
+
+                        }
 
 // Destructor needs to be defined here in implementation file as the header
 // does not have full definition of some classes.
 Agent::~Agent() {
+    if(io_ &&
+       io_->IsConnected())
+    {
+        Disconnect();
+        Stop();
+    }
+    magic_ = BAD_MAGIC; 
+    fprintf(gLogStream, "v8inspector: Agent deleted at 0X%p\n", this);
 }
 
-bool Agent::Start(Isolate *isolate, Platform* platform, const char* path) {
+void Agent::SetLogFileStream(FILE *file) {gLogStream = file;}
+
+bool Agent::IsValid() {
+    if(magic_ != VALID_MAGIC)
+        fprintf(gLogStream, "v8inspector: Invalid agent at 0X%p - magic = %08X\n", this, magic_);
+    return magic_ == VALID_MAGIC;
+}
+
+
+const std::string &Agent::GetFrontendURL()
+{
+    frontend_url_buff_ = MakeFrontEndURL(host_name_, io_->port(), target_id_);
+    return frontend_url_buff_;
+}
+
+
+bool Agent::Prepare(Isolate *isolate, Platform* platform, const char* path) {
   path_ = path == nullptr ? "" : path;
   isolate_ = isolate;
   client_ =
@@ -279,7 +319,11 @@ bool Agent::StartIoThread(bool wait_for_connect) {
 
   enabled_ = true;
   io_ = std::unique_ptr<InspectorIo>(
-      new InspectorIo(isolate_, platform_, path_, host_name_, true, file_path_, this));
+      new InspectorIo(isolate_, platform_, path_, host_name_, true, file_path_, this, target_id_));
+  return true;
+}
+bool Agent::Run() {
+
   if (!io_->Start()) {
     client_.reset();
     return false;

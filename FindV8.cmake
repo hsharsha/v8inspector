@@ -14,20 +14,30 @@
 #  V8_LIBRARIES, Library path and libs
 #  V8_INCLUDE_DIR, where to find V8 headers
 
-FIND_PATH(V8_INCLUDE_DIR v8.h
-          PATH_SUFFIXES include)
+### FIND_PATH(V8_INCLUDE_DIR v8.h
+###           PATH_SUFFIXES include)
+SET(V8_INCLUDE_DIR "D:/Develop/google_v8/v8-v141-x64.7.1.302.4/include")
 
-FIND_LIBRARY(V8_SHAREDLIB
-             NAMES v8
-             PATH_SUFFIXES lib)
+### FIND_LIBRARY(V8_SHAREDLIB
+###              NAMES v8
+###              PATH_SUFFIXES lib)
+### 
+### FIND_LIBRARY(V8_PLATFORMLIB
+###              NAMES v8_libplatform
+###              PATH_SUFFIXES lib)
+### 
+### FIND_LIBRARY(V8_BASELIB
+###              NAMES v8_libbase
+###              PATH_SUFFIXES lib)
 
-FIND_LIBRARY(V8_PLATFORMLIB
-             NAMES v8_libplatform
-             PATH_SUFFIXES lib)
 
-FIND_LIBRARY(V8_BASELIB
-             NAMES v8_libbase
-             PATH_SUFFIXES lib)
+
+
+
+
+SET(V8_SHAREDLIB   "D:/Develop/google_v8/v8-v141-x64.7.1.302.4/lib/Release/v8.dll.lib") 
+SET(V8_PLATFORMLIB "D:/Develop/google_v8/v8-v141-x64.7.1.302.4/lib/Release/v8_libbase.dll.lib") 
+SET(V8_BASELIB     "D:/Develop/google_v8/v8-v141-x64.7.1.302.4/lib/Release/v8_libplatform.dll.lib") 
 
 IF (V8_SHAREDLIB AND V8_PLATFORMLIB AND V8_BASELIB)
     SET(V8_LIBRARIES ${V8_SHAREDLIB} ${V8_PLATFORMLIB} ${V8_BASELIB})

@@ -15,9 +15,11 @@
 #  LZ4_INCLUDE_DIR, where to find the ICU headers
 
 
-FIND_LIBRARY(LZ_LIBRARIES
-             NAMES z
-             PATH_SUFFIXES lib)
+## FIND_LIBRARY(LZ_LIBRARIES
+##              NAMES z
+##              PATH_SUFFIXES lib)
+## 
+SET(LZ_LIBRARIES "D:/Develop/google_v8/v8Inspector/lz4-dev/visual/VS2017/bin/x64_Debug/liblz4.lib")
 
 IF (LZ_LIBRARIES)
   MESSAGE(STATUS "Using LZ library: ${LZ_LIBRARIES}")

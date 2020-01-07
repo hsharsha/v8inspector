@@ -64,7 +64,7 @@ enum class TransportAction {
 class InspectorIo {
  public:
   InspectorIo(Isolate* isolate, Platform* platform,
-              const std::string& path, std::string host_name, bool wait_for_connect, std::string file_path_, Agent *agent);
+              const std::string& path, std::string host_name, bool wait_for_connect, std::string file_path_, Agent *agent, const std::string &target_id);
 
   ~InspectorIo();
   // Start the inspector agent thread, waiting for it to initialize,
@@ -92,11 +92,6 @@ class InspectorIo {
   std::string host() const { return host_name_; }
   std::vector<std::string> GetTargetIds() const;
 
- private:
-  template <typename Action>
-  using MessageQueue =
-      std::deque<std::tuple<Action, int,
-                  std::unique_ptr<v8_inspector::StringBuffer>>>;
   enum class State {
     kNew,
     kAccepting,
@@ -106,13 +101,18 @@ class InspectorIo {
     kShutDown
   };
 
+ private:
+  template <typename Action>
+  using MessageQueue =
+      std::deque<std::tuple<Action, int,
+                  std::unique_ptr<v8_inspector::StringBuffer>>>;
   // Callback for main_thread_req_'s uv_async_t
   static void MainThreadReqAsyncCb(uv_async_t* req);
 
   // Wrapper for agent->ThreadMain()
   static void ThreadMain(void* agent);
 
-  // Runs a uv_loop_t
+  template<typename Transport> void IOStartUp();
   template <typename Transport> void ThreadMain();
   // Called by ThreadMain's loop when triggered by thread_req_, writes
   // messages from outgoing_message_queue to the InspectorSockerServer
@@ -173,10 +173,12 @@ class InspectorIo {
   std::string script_path_;
   std::string host_name_;
   std::string file_path_;
+  std::string target_id_;
   Agent *agent_;
   const bool wait_for_connect_;
   int port_;
 
+  void *server_data_ = nullptr;
   friend class DispatchMessagesTask;
   friend class IoSessionDelegate;
   friend void InterruptCallback(Isolate*, void* agent);

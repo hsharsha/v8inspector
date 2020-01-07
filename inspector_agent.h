@@ -25,12 +25,22 @@
 
 #include <memory>
 #include <string>
+#include <functional>
 #include "v8.h"
 #include "v8-inspector.h"
 
 #include <stddef.h>
 
+#ifdef WIN32
+#define EXPORT_ATTRIBUTE __declspec(dllexport) 
+#else
+#define EXPORT_ATTRIBUTE __attribute__((visibility("default"))) 
+#endif
+
+
 namespace inspector {
+
+
 
 using namespace v8;
 
@@ -47,22 +57,34 @@ class CBInspectorClient;
 
 class Agent {
  public:
-   __attribute__((visibility("default"))) Agent(std::string host_name, std::string file_path);
-  __attribute__((visibility("default"))) ~Agent();
+
+  EXPORT_ATTRIBUTE  static void SetLogFileStream(FILE *file);
+  EXPORT_ATTRIBUTE  Agent(const std::string &host_name, const std::string &file_path, const std::string &target_id = std::string()); 
+  EXPORT_ATTRIBUTE  ~Agent();
 
   // Create client_, may create io_ if option enabled
-  __attribute__((visibility("default"))) bool Start(Isolate* isolate, Platform* platform, const char* path);
+  EXPORT_ATTRIBUTE  bool Start(Isolate* isolate, Platform* platform, const char* file_path = nullptr)
+  {
+    if(! Prepare(isolate, platform, file_path))
+        return false;
+    return Run();
+  }
+
+  EXPORT_ATTRIBUTE  bool Prepare(Isolate* isolate, Platform* platform, const char* file_path = nullptr);
+  EXPORT_ATTRIBUTE  bool Run();
+  EXPORT_ATTRIBUTE  const std::string &GetFrontendURL();
   // Stop and destroy io_
-  __attribute__((visibility("default"))) void Stop();
+  EXPORT_ATTRIBUTE  void Stop();
 
   bool IsStarted() { return !!client_; }
+  bool IsValid();
 
   // IO thread started, and client connected
   bool IsConnected();
 
 
   void WaitForDisconnect();
-  void FatalException(Local<Value> error,
+   EXPORT_ATTRIBUTE  void FatalException(Local<Value> error,
                       v8::Local<v8::Message> message);
 
   // These methods are called by the WS protocol and JS binding to create
@@ -75,7 +97,7 @@ class Agent {
 
   void RunMessageLoop();
   bool enabled() { return enabled_; }
-  __attribute__((visibility("default"))) void PauseOnNextJavascriptStatement(const std::string& reason);
+  EXPORT_ATTRIBUTE  void PauseOnNextJavascriptStatement(const std::string& reason);
 
   // Initialize 'inspector' module bindings
   static void InitInspector(Local<Object> target,
@@ -102,6 +124,12 @@ class Agent {
   std::string path_;
   std::string host_name_;
   std::string file_path_;
+  std::string target_id_;
+
+  std::string frontend_url_buff_;
+  static const int VALID_MAGIC = 0xF0F0F0F0;
+  static const int   BAD_MAGIC = 0xDE11C0DE;
+  int magic_ = VALID_MAGIC;
 };
 
 }  // namespace inspector

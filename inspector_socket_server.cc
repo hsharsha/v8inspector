@@ -36,6 +36,8 @@
 
 namespace inspector {
 
+extern FILE *gLogStream;
+
 // Function is declared in inspector_io.h so the rest of the node does not
 // depend on inspector_socket_server.h
 std::string FormatWsAddress(const std::string& host, int port,
@@ -58,10 +60,22 @@ std::string FormatWsAddress(const std::string& host, int port,
 }
 
 
+std::string MakeFrontEndURL(const std::string& host,
+                            int port,
+                            const std::string& id)
+{
+    std::string frontend_url;
+    frontend_url = "chrome-devtools://devtools/bundled";
+    frontend_url += "/js_app.html?experiments=true&v8only=true&ws=";
+    frontend_url += FormatWsAddress(host, port, id, false);
+    return frontend_url;
+}
+
 namespace {
 
 static const uint8_t PROTOCOL_JSON[] = {
-  #include "v8_inspector_protocol_json.h"  // NOLINT(build/include_order)
+//  #include "v8_inspector_protocol_json.h"  // NOLINT(build/include_order)
+    '0'
 };
 
 void Escape(std::string* string) {
@@ -114,22 +128,24 @@ void OnBufferAlloc(uv_handle_t* handle, size_t len, uv_buf_t* buf) {
   buf->len = len;
 }
 
-void PrintDebuggerReadyMessage(const std::string& host,
+std::string PrintDebuggerReadyMessage(const std::string& host,
                                int port,
                                const std::vector<std::string>& ids,
-                               FILE* out) {
-  if (out == NULL) {
-    return;
-  }
+                               FILE* out) 
+{
+  std::string result;
   for (const std::string& id : ids) {
-    std::string frontend_url;
-    frontend_url = "chrome-devtools://devtools/bundled";
-    frontend_url += "/js_app.html?experiments=true&v8only=true&ws=";
-    frontend_url += FormatWsAddress(host, port, id, false);
-    fprintf(out, "%s\n", frontend_url.c_str());
-    fprintf(stderr, "Debugger starting on %s\n", frontend_url.c_str());
+    std::string frontend_url = MakeFrontEndURL(host, port, id);
+    if(out)
+        fprintf(out, "%s\n", frontend_url.c_str());
+    fprintf(gLogStream, "v8inspector: Debugger connection SUCCESS; Copy URL and open in Chrom browser:\n%s\n", frontend_url.c_str());
+
+    result += frontend_url + "\n";
   }
-  fflush(out);
+  if(out)
+    fflush(out);
+
+  return result;
 }
 
 void SendHttpResponse(InspectorSocket* socket, const std::string& response) {
@@ -156,6 +172,11 @@ void SendProtocolJson(InspectorSocket* socket) {
   strm.zalloc = Z_NULL;
   strm.zfree = Z_NULL;
   strm.opaque = Z_NULL;
+
+  // BUGBUG ToFix
+  printf("PROTOCOL_JSON not included!");
+  return;
+
   assert(Z_OK == inflateInit(&strm));
   static const size_t kDecompressedSize =
       PROTOCOL_JSON[0] * 0x10000u +
@@ -351,6 +372,7 @@ void InspectorSocketServer::SessionTerminated(SocketSession* session) {
 
 bool InspectorSocketServer::HandleGetRequest(InspectorSocket* socket,
                                              const std::string& path) {
+  
   const char* command = MatchPathSegment(path.c_str(), "/json");
   if (command == nullptr)
     return false;
@@ -372,6 +394,7 @@ bool InspectorSocketServer::HandleGetRequest(InspectorSocket* socket,
     return false;
   }
   return false;
+
 }
 
 void InspectorSocketServer::SendListResponse(InspectorSocket* socket) {
@@ -412,7 +435,7 @@ void InspectorSocketServer::SendListResponse(InspectorSocket* socket) {
   SendHttpResponse(socket, MapsToString(response));
 }
 
-bool InspectorSocketServer::Start() {
+bool InspectorSocketServer::Start(std::string &debugURL) {
   assert(state_ == ServerState::kNew);
   struct addrinfo hints;
   memset(&hints, 0, sizeof(hints));
@@ -424,7 +447,7 @@ bool InspectorSocketServer::Start() {
                            port_string.c_str(), &hints);
   if (err < 0) {
     if (out_ != NULL) {
-      fprintf(out_, "Unable to resolve \"%s\": %s\n", host_.c_str(),
+      fprintf(out_, "v8inspector: Unable to resolve \"%s\": %s\n", host_.c_str(),
               uv_strerror(err));
     }
     return false;
@@ -442,7 +465,7 @@ bool InspectorSocketServer::Start() {
   // show one error, for the last address.
   if (server_sockets_.empty()) {
     if (out_ != NULL) {
-      fprintf(out_, "Starting inspector on %s:%d failed: %s\n",
+      fprintf(out_, "v8inspector: Starting inspector on %s:%d failed: %s\n",
               host_.c_str(), port_, uv_strerror(err));
       fflush(out_);
     }
@@ -450,7 +473,7 @@ bool InspectorSocketServer::Start() {
   }
   state_ = ServerState::kRunning;
   // getaddrinfo sorts the addresses, so the first port is most relevant.
-  PrintDebuggerReadyMessage(host_, server_sockets_[0]->port(),
+  debugURL = PrintDebuggerReadyMessage(host_, server_sockets_[0]->port(),
                             delegate_->GetTargetIds(), out_);
   return true;
 }

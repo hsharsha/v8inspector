@@ -14,6 +14,8 @@
 #  ICU_LIBRARIES, Library path and libs
 #  ICU_INCLUDE_DIR, where to find the ICU headers
 
+SET(ICU_INCLUDE_DIR "D:/Develop/google_v8/v8Inspector/icu/include/unicode/")
+
 FIND_PATH(ICU_INCLUDE_DIR unicode/utypes.h
           PATH_SUFFIXES include)
 

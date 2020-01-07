@@ -14,13 +14,18 @@
 #  LIBUV_LIBRARIES, Library path and libs
 #  LIBUV_INCLUDE_DIR, where to find the ICU headers
 
-FIND_PATH(LIBUV_INCLUDE_DIR uv.h
-          PATH_SUFFIXES include)
+SET(LIBUV_INCLUDE_DIR "D:/Develop/google_v8/v8Inspector/libuv_1_10/include")
 
-FIND_LIBRARY(LIBUV_LIBRARIES
-          NAMES uv libuv
-          PATH_SUFFIXES lib)
+SET(LIBUV_LIBRARIES "D:/Develop/google_v8/v8Inspector/libuv_1_10/libuv.lib")
 
+
+### FIND_PATH(LIBUV_INCLUDE_DIR uv.h
+###           PATH_SUFFIXES include)
+### 
+### FIND_LIBRARY(LIBUV_LIBRARIES
+###           NAMES uv libuv
+###           PATH_SUFFIXES lib)
+### 
 IF (LIBUV_LIBRARIES)
   MESSAGE(STATUS "Found libuv headers in ${LIBUV_INCLUDE_DIR}")
   MESSAGE(STATUS "Using libuv libraries ${LIBUV_LIBRARIES}")

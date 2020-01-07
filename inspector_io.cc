@@ -37,6 +37,26 @@
 #include <cassert>
 
 namespace inspector {
+extern FILE *gLogStream;
+
+// UUID RFC: https://www.ietf.org/rfc/rfc4122.txt
+// Used ver 4 - with numbers
+std::string GenerateID() {
+  uint8_t buffer[16];
+  RAND_bytes(buffer, sizeof(buffer));
+  char uuid[256];
+  snprintf(uuid, sizeof(uuid), "%04x%04x-%04x-%04x-%04x-%04x%04x%04x",
+           buffer[0],
+           buffer[1],
+           buffer[2],
+           (buffer[3] & 0x0fff) | 0x4000,
+           (buffer[4] & 0x3fff) | 0x8000,
+           buffer[5],
+           buffer[6],
+           buffer[7]);
+  return uuid;
+}
+
 namespace {
 using AsyncAndAgent = std::pair<uv_async_t, Agent*>;
 using namespace v8;
@@ -71,24 +91,6 @@ std::string ScriptPath(uv_loop_t* loop, const std::string& script_name) {
   }
 
   return script_path;
-}
-
-// UUID RFC: https://www.ietf.org/rfc/rfc4122.txt
-// Used ver 4 - with numbers
-std::string GenerateID() {
-  uint8_t buffer[16];
-  RAND_bytes(buffer, sizeof(buffer));
-  char uuid[256];
-  snprintf(uuid, sizeof(uuid), "%04x%04x-%04x-%04x-%04x-%04x%04x%04x",
-           buffer[0],
-           buffer[1],
-           buffer[2],
-           (buffer[3] & 0x0fff) | 0x4000,
-           (buffer[4] & 0x3fff) | 0x8000,
-           buffer[5],
-           buffer[6],
-           buffer[7]);
-  return uuid;
 }
 
 std::string StringViewToUtf8(const StringView& view) {
@@ -162,7 +164,9 @@ class IoSessionDelegate : public InspectorSessionDelegate {
 class InspectorIoDelegate: public inspector::SocketServerDelegate {
  public:
   InspectorIoDelegate(InspectorIo* io, const std::string& script_path,
-                      const std::string& script_name, bool wait);
+                      const std::string& script_name, 
+                      const std::string& target_id, bool wait);
+
   // Calls PostIncomingMessage() with appropriate InspectorAction:
   //   kStartSession
   bool StartSession(int session_id, const std::string& target_id) override;
@@ -200,6 +204,11 @@ class DispatchMessagesTask : public Task {
   explicit DispatchMessagesTask(Agent* agent) : agent_(agent) {}
 
   void Run() override {
+    if(! agent_->IsValid())
+    {
+        fprintf(gLogStream, "v8inspector: #### Invalid agent found in %s %d\n", __FILE__, __LINE__);
+        return;
+    }
     InspectorIo* io = agent_->io();
     if (io != nullptr)
       io->DispatchMessages();
@@ -212,14 +221,16 @@ class DispatchMessagesTask : public Task {
 InspectorIo::InspectorIo(Isolate* isolate, Platform* platform,
                          const std::string& path, std::string host_name,
                          bool wait_for_connect, std::string file_path,
-                         Agent *agent)
+                         Agent *agent,
+                         const std::string &target_id)
                          : thread_(), delegate_(nullptr),
                            state_(State::kNew), isolate_(isolate),
                            thread_req_(), platform_(platform),
                            dispatching_messages_(false), session_id_(0),
                            script_name_(path),
                            wait_for_connect_(wait_for_connect), host_name_(host_name), port_(0),
-                           file_path_(file_path), agent_(agent){
+                           file_path_(file_path), agent_(agent), target_id_(target_id)
+{
   main_thread_req_ = new AsyncAndAgent({uv_async_t(), agent_});
   assert(0 == uv_async_init(uv_default_loop(), &main_thread_req_->first,
                             InspectorIo::MainThreadReqAsyncCb));
@@ -227,6 +238,8 @@ InspectorIo::InspectorIo(Isolate* isolate, Platform* platform,
   assert(0 == uv_sem_init(&thread_start_sem_, 0));
   //uv_cond_init(&incoming_message_cond_);
   //uv_mutex_init(&state_lock_);
+
+  IOStartUp<InspectorSocketServer>();
 }
 
 InspectorIo::~InspectorIo() {
@@ -273,8 +286,8 @@ void InspectorIo::WaitForDisconnect() {
   if (state_ == State::kConnected) {
     state_ = State::kShutDown;
     Write(TransportAction::kStop, 0, StringView());
-    fprintf(stderr, "Waiting for the debugger to disconnect...\n");
-    fflush(stderr);
+    fprintf(gLogStream, "v8inspector: Waiting for the debugger to disconnect...\n");
+    fflush(gLogStream);
     agent_->RunMessageLoop();
   }
 }
@@ -306,43 +319,92 @@ void InspectorIo::IoThreadAsyncCb(uv_async_t* async) {
       break;
     case TransportAction::kSendMessage:
       std::string message = StringViewToUtf8(std::get<2>(outgoing)->string());
-      //fprintf(stderr, "%d %s sending message %s \n", __LINE__, __FILE__, message.c_str());
+      //fprintf(gLogStream, "v8inspector: %d %s sending message %s \n", __LINE__, __FILE__, message.c_str());
       transport->Send(std::get<1>(outgoing), message);
       break;
     }
   }
 }
+  template <typename Transport> struct server_data_type
+  {
+        InspectorIoDelegate         *delegate = nullptr;
+        Transport                   *server = nullptr;
+        TransportAndIo<Transport>   *queue_transport = nullptr;
+        FILE                        *jsFile = nullptr;
+        uv_loop_t loop;
+
+        int magic = 76543210;
+
+        ~server_data_type()
+        {
+            delegate = nullptr;
+            server = nullptr;
+            queue_transport = nullptr;
+            jsFile = nullptr;
+            magic = 0xBADC0DE;
+        }
+  };
 
 template<typename Transport>
-void InspectorIo::ThreadMain() {
-  uv_loop_t loop;
-  loop.data = nullptr;
-  int err = uv_loop_init(&loop);
+void InspectorIo::IOStartUp() {
+
+    server_data_type<Transport> *server_data = new server_data_type<Transport>;
+    server_data_ = server_data;
+
+  server_data->loop.data = nullptr;
+  int err = uv_loop_init(&server_data->loop);
   assert(err == 0);
   thread_req_.data = nullptr;
-  err = uv_async_init(&loop, &thread_req_, IoThreadAsyncCb<Transport>);
+  err = uv_async_init(&server_data->loop, &thread_req_, IoThreadAsyncCb<Transport>);
   assert(err == 0);
-  std::string script_path = ScriptPath(&loop, script_name_);
-  InspectorIoDelegate delegate(this, script_path, script_name_,
-                               wait_for_connect_);
-  delegate_ = &delegate;
-  Transport server(&delegate, &loop, host_name_, port_, fopen(file_path_.c_str(), "w"));
-  TransportAndIo<Transport> queue_transport(&server, this);
-  thread_req_.data = &queue_transport;
-  if (!server.Start()) {
+  std::string script_path = ScriptPath(&server_data->loop, script_name_);
+  server_data->delegate = new InspectorIoDelegate (this, script_path, script_name_, target_id_, wait_for_connect_);
+  delegate_ = server_data->delegate;
+
+  if(! file_path_.empty())
+  {
+      server_data->jsFile = fopen(file_path_.c_str(), "w");
+      if(! server_data->jsFile) 
+      {
+         fprintf(gLogStream, "v8inspector: Unable to open file %s\n", file_path_.c_str());
+         return;
+      }
+  }
+
+  server_data->server = new Transport(delegate_, &server_data->loop, host_name_, port_, server_data->jsFile);
+
+  server_data->queue_transport = new TransportAndIo<Transport>(server_data->server, this);
+  thread_req_.data = server_data->queue_transport;
+  std::string debugURL;
+  if (! server_data->server->Start(debugURL)) {
     state_ = State::kError;  // Safe, main thread is waiting on semaphore
     assert(0 == CloseAsyncAndLoop(&thread_req_));
     uv_sem_post(&thread_start_sem_);
     return;
   }
-  port_ = server.Port();  // Safe, main thread is waiting on semaphore.
+  
+  port_ = server_data->server->Port();  // Safe, main thread is waiting on semaphore.
   if (!wait_for_connect_) {
     uv_sem_post(&thread_start_sem_);
   }
-  uv_run(&loop, UV_RUN_DEFAULT);
+}
+template<typename Transport>
+void InspectorIo::ThreadMain() {
+//  IOStartUp<Transport>();
+
+  server_data_type<Transport> *server_data = reinterpret_cast<server_data_type<Transport> *> (server_data_);
+  
+  uv_run(&server_data->loop, UV_RUN_DEFAULT);
   thread_req_.data = nullptr;
-  assert(uv_loop_close(&loop) ==  0);
+  assert(uv_loop_close(&server_data->loop) ==  0);
   delegate_ = nullptr;
+  if(server_data->jsFile)
+     fclose(server_data->jsFile);
+
+  delete server_data->queue_transport;
+  delete server_data->server;
+  delete server_data->delegate;
+  delete server_data;
 }
 
 template <typename ActionType>
@@ -370,7 +432,13 @@ void InspectorIo::SwapBehindLock(MessageQueue<ActionType>* vector1,
 
 void InspectorIo::PostIncomingMessage(InspectorAction action, int session_id,
                                       const std::string& message) {
-    //fprintf(stderr, "%s %d appending action %d session %d and  message %s\n", __FILE__, __LINE__, action, session_id, message.c_str());
+    if(! agent_->IsValid())
+    {
+        fprintf(gLogStream, "v8inspector: #### Invalid agent found in %s %d\n", __FILE__, __LINE__);
+        return;
+    }
+
+    //fprintf(gLogStream, "v8inspector: %s %d appending action %d session %d and  message %s\n", __FILE__, __LINE__, action, session_id, message.c_str());
   if (AppendMessage(&incoming_message_queue_, action, session_id,
                     Utf8ToStringView(message))) {
     Agent* agent = main_thread_req_->second;
@@ -423,7 +491,7 @@ void InspectorIo::DispatchMessages() {
         assert(session_delegate_ == nullptr);
         session_id_ = std::get<1>(task);
         state_ = State::kConnected;
-        fprintf(stderr, "Debugger attached.\n");
+        fprintf(gLogStream, "v8inspector: Debugger attached.\n");
         session_delegate_ = std::unique_ptr<InspectorSessionDelegate>(
             new IoSessionDelegate(this));
         agent_->Connect(session_delegate_.get());
@@ -436,11 +504,24 @@ void InspectorIo::DispatchMessages() {
           state_ = State::kAccepting;
         }
         agent_->Disconnect();
+        fprintf(gLogStream, "v8inspector: Debugger disconnected.\n");
         session_delegate_.reset();
         break;
       case InspectorAction::kSendMessage:
-        agent_->Dispatch(message);
-        break;
+      {
+          std::wstring s = (const wchar_t *)message.characters16();
+          // BUGBUG ToFix
+          // This message is generated by chrome devtools when opening a global object in the debugger pane
+          // Using v8 7.1.302.4 this call will crash v8inspector in v8.dll
+          if(s.find(L"\"ownProperties\":true") != std::string::npos)
+          {
+              fprintf(gLogStream, "v8inspector: SKIPPING message: %S\n", s.c_str());
+              continue;
+          }
+          fprintf(gLogStream, "v8inspector: Dispatching message: %S\n", s.c_str());
+          agent_->Dispatch(message);
+          break;
+      }
       }
     }
   } while (had_messages);
@@ -470,14 +551,17 @@ void InspectorIo::Write(TransportAction action, int session_id,
 InspectorIoDelegate::InspectorIoDelegate(InspectorIo* io,
                                          const std::string& script_path,
                                          const std::string& script_name,
+                                         const std::string& target_id,
                                          bool wait)
                                          : io_(io),
                                            connected_(false),
                                            session_id_(0),
                                            script_name_(script_name),
                                            script_path_(script_path),
-                                           target_id_(GenerateID()),
-                                           waiting_(wait) { }
+                                           target_id_(target_id),
+                                           waiting_(wait) 
+{
+}
 
 
 bool InspectorIoDelegate::StartSession(int session_id,
